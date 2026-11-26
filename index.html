@@ -2,106 +2,256 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F2B705">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Contech Site Log</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F2B705'/%3E%3Cpath d='M14 40h22v8H14zM18 30h12v10H18zM30 32l10-10 8 8' stroke='%2317191C' stroke-width='5' fill='none'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* VOICE: plain, sure, outdoor-readable, like a machine logbook card
-   IDEA: the yellow equipment logbook a timekeeper carries on site
-   PICTURE: the machine card with its big meter reading and the live fuel gauge
-   COLOUR and TYPE: earthmover yellow, charcoal ink, one red for problems; Barlow / Barlow Condensed numbers
-   LAYOUT: one column, thumb-sized buttons, sticky save bar at the bottom */
-:root{color-scheme:light dark;--bg:light-dark(#f4f2ec,#141414);--card:light-dark(#fff,#1f1f1f);--ink:light-dark(#1c1c1c,#f2f2f2);--mute:light-dark(#6b6b6b,#a5a5a5);--line:light-dark(#e2ded3,#333);--yel:#f2b705;--yel2:light-dark(#fff4cc,#3a3010);--red:#c0392b;--red2:light-dark(#fde2de,#3b1714);--grn:#1e7d4f;--grn2:light-dark(#dcefe2,#123020)}
-:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
-*{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Barlow,system-ui,sans-serif;overflow-x:clip;padding-bottom:96px}
+/* Site log for junior staff: bright, high-contrast (readable in sun), big type, one job per screen,
+   numbered steps, error shown right under the field that needs fixing. */
+:root{
+  --bg:#F4F2ED;--card:#FFFFFF;--ink:#16181B;--ink2:#3D4249;--mute:#6A7079;--line:#E2DDD2;--line2:#CFC8BA;
+  --brand:#F2B705;--brand2:#FFF3C4;--brandInk:#16181B;
+  --ok:#137A4A;--okbg:#E2F4EA;--warn:#9A5400;--warnbg:#FFEFD2;--bad:#C42B2B;--badbg:#FDE6E4;
+  --blue:#1D5FD1;--bluebg:#E5EEFD;--teal:#0E7C86;--tealbg:#DDF3F4;--slate:#4B5563;--slatebg:#ECEEF1;
+  --r:18px;--sh:0 1px 2px rgba(22,24,27,.06),0 4px 14px rgba(22,24,27,.06);
+  color-scheme:light;
+}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html{font-size:17px}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1rem/1.45 'Noto Sans','Noto Sans Devanagari',system-ui,sans-serif;overflow-x:clip;padding-bottom:calc(110px + env(safe-area-inset-bottom))}
 button,input,select,textarea{font:inherit;color:inherit}
-.top{background:var(--yel);color:#1c1c1c;padding:14px 16px 12px;position:sticky;top:0;z-index:5}
-.top .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.top h1{font:700 22px/1.1 'Barlow Condensed',sans-serif;margin:0}
-.top small{display:block;font-size:13px;opacity:.8}
-.chip{border:1.5px solid #1c1c1c;border-radius:20px;padding:4px 10px;font-size:13px;background:transparent;font-weight:600;cursor:pointer}
-.wrap{max-width:560px;margin:0 auto;padding:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
-.prog{display:flex;align-items:center;gap:14px}
-.ring{width:64px;height:64px;flex:none}
-.prog b{font:700 28px 'Barlow Condensed',sans-serif}
-.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 12px;text-align:left;min-height:88px;cursor:pointer;display:flex;flex-direction:column;gap:6px}
-.tile svg{width:30px;height:30px}
-.tile span{font-weight:700}
-.tile:first-child{background:#1c1c1c;color:#fff;border-color:#1c1c1c}
-h2{font:700 20px 'Barlow Condensed',sans-serif;margin:6px 0 10px}
-.m{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer;background:none;border-left:0;border-right:0;border-bottom:0;width:100%;text-align:left}
-.m:first-of-type{border-top:0}
-.m .ic{width:40px;height:40px;border-radius:10px;background:var(--yel2);display:grid;place-items:center;flex:none}
-.m .ic svg{width:26px;height:26px}
-.m .nm{flex:1}.m .nm small{display:block;color:var(--mute);font-size:13px}
-.tag{font-size:12px;font-weight:700;border-radius:8px;padding:3px 8px;white-space:nowrap}
-.ok{background:var(--grn2);color:var(--grn)}.pend{background:var(--yel2);color:light-dark(#8a6400,#f2b705)}.bad{background:var(--red2);color:var(--red)}
-label{display:block;font-weight:600;margin:12px 0 6px}
-label small{font-weight:500;color:var(--mute)}
-input[type=number],input[type=text],input[type=date],select,textarea{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card);font-size:17px}
-input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid var(--yel);outline-offset:1px}
-.big{font:700 30px 'Barlow Condensed',sans-serif!important;letter-spacing:.5px}
-.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.seg{display:flex;flex-wrap:wrap;gap:8px}
-.seg button{min-height:44px;padding:8px 14px;border-radius:22px;border:1.5px solid var(--line);background:var(--card);font-weight:600;cursor:pointer}
-.seg button.on{background:#1c1c1c;color:#fff;border-color:#1c1c1c}
-.read{display:flex;justify-content:space-between;align-items:baseline;background:var(--yel2);border-radius:10px;padding:10px 12px}
-.read b{font:700 26px 'Barlow Condensed',sans-serif}
-.gauge{border-radius:12px;padding:12px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.gauge b{font:700 30px 'Barlow Condensed',sans-serif;white-space:nowrap}
-.photo{border:2px dashed var(--line);border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer;min-height:64px}
-.photo img{width:64px;height:64px;object-fit:cover;border-radius:8px}
-.photo input{display:none}
-.err{color:var(--red);font-weight:600;font-size:14px;margin-top:8px}
-.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
-.bar .in{max-width:560px;margin:0 auto;display:flex;gap:10px}
-.btn{flex:1;min-height:54px;border-radius:12px;border:0;font:700 19px Barlow,sans-serif;cursor:pointer}
-.btn.pri{background:#1c1c1c;color:#fff}.btn.sec{background:var(--card);border:1.5px solid var(--line);flex:0 0 96px}
-.btn:disabled{opacity:.5}
-.done{text-align:center;padding:30px 10px}
-.done svg{width:84px;height:84px}
-.note{font-size:13px;color:var(--mute)}
-.q{background:var(--red2);color:var(--red);font-weight:700;border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:14px}
+button{cursor:pointer}
+.num{font-variant-numeric:tabular-nums}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:var(--brand);color:var(--brandInk);padding:calc(10px + env(safe-area-inset-top)) 14px 12px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.top .in{max-width:620px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.iconbtn{width:46px;height:46px;border-radius:14px;border:0;background:rgba(0,0,0,.08);display:grid;place-items:center;flex:none}
+.iconbtn svg{width:24px;height:24px}
+.ttl{flex:1}
+.ttl b{display:block;font-size:1.12rem;font-weight:800;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ttl small{display:block;font-size:.8rem;font-weight:600;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lang{display:flex;background:rgba(0,0,0,.1);border-radius:12px;padding:3px;flex:none}
+.lang button{border:0;background:transparent;border-radius:9px;padding:7px 10px;font-weight:700;font-size:.82rem;min-height:38px}
+.lang button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+
+.net{display:none;background:var(--ink);color:#fff;text-align:center;font-weight:600;font-size:.9rem;padding:8px 12px}
+.net.show{display:block}
+.wrap{max-width:620px;margin:0 auto;padding:14px 14px 0}
+
+/* cards and headings */
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-bottom:14px}
+.h{font-size:1.05rem;font-weight:800;margin:4px 2px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.h small{font-weight:600;color:var(--mute);font-size:.85rem}
+.sub{color:var(--mute);font-size:.92rem;margin:0}
+
+/* greeting + progress */
+.hello{display:flex;align-items:center;gap:14px}
+.avatar{width:52px;height:52px;border-radius:50%;background:var(--ink);color:var(--brand);display:grid;place-items:center;font-weight:800;font-size:1.2rem;flex:none}
+.hello b{font-size:1.2rem;font-weight:800;display:block;line-height:1.2}
+.prog{margin-top:14px}
+.prog .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.prog .big{font-size:1.9rem;font-weight:800;line-height:1}
+.prog .big span{font-size:1rem;color:var(--mute);font-weight:600}
+.meter{height:14px;background:var(--slatebg);border-radius:10px;overflow:hidden}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,#F2B705,#E09B00);border-radius:10px;transition:width .5s}
+.meter.full i{background:var(--ok)}
+
+/* action tiles */
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.act{border:0;border-radius:var(--r);background:var(--card);box-shadow:var(--sh);padding:16px 14px;text-align:left;display:flex;flex-direction:column;gap:10px;min-height:120px;position:relative}
+.act .ico{width:52px;height:52px;border-radius:16px;display:grid;place-items:center}
+.act .ico svg{width:30px;height:30px}
+.act b{font-size:1.02rem;font-weight:800;line-height:1.2}
+.act small{color:var(--mute);font-size:.82rem;font-weight:500;line-height:1.25}
+.act.main{grid-column:1/-1;flex-direction:row;align-items:center;background:var(--ink);color:#fff;min-height:96px}
+.act.main .ico{background:var(--brand)}
+.act.main small{color:#C9CCD1}
+.act.main .go{margin-left:auto;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.12);display:grid;place-items:center;flex:none}
+.y{background:var(--brand2)}.b{background:var(--bluebg);color:var(--blue)}.t{background:var(--tealbg);color:var(--teal)}.r{background:var(--badbg);color:var(--bad)}
+
+/* machine rows */
+.list{display:flex;flex-direction:column;gap:10px}
+.mrow{width:100%;border:2px solid transparent;background:var(--card);border-radius:16px;box-shadow:var(--sh);padding:12px;display:flex;align-items:center;gap:12px;text-align:left}
+.mrow:active{border-color:var(--brand)}
+.mic{width:54px;height:54px;border-radius:14px;background:var(--brand2);display:grid;place-items:center;flex:none}
+.mic svg{width:34px;height:34px}
+.mname{flex:1}
+.mname b{display:block;font-weight:800;font-size:1.02rem;line-height:1.25}
+.mname small{display:block;color:var(--mute);font-size:.85rem;font-weight:500}
+.pill{font-size:.8rem;font-weight:800;border-radius:30px;padding:5px 11px;white-space:nowrap}
+.p-ok{background:var(--okbg);color:var(--ok)}.p-pend{background:var(--warnbg);color:var(--warn)}.p-bad{background:var(--badbg);color:var(--bad)}
+.search{position:relative;margin-bottom:12px}
+.search input{padding-left:46px!important}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:22px;height:22px;color:var(--mute)}
+.empty{text-align:center;color:var(--mute);padding:24px 8px;font-weight:600}
+details.done-list summary{list-style:none;cursor:pointer;font-weight:800;padding:6px 2px 10px;display:flex;justify-content:space-between}
+details.done-list summary::-webkit-details-marker{display:none}
+
+/* forms */
+.step{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-bottom:14px;scroll-margin-top:90px}
+.step.err{box-shadow:0 0 0 3px var(--bad),var(--sh)}
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sn{width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:800;font-size:.9rem;flex:none}
+.sn.ok{background:var(--ok)}
+.sh b{font-size:1.05rem;font-weight:800;flex:1}
+.req{font-size:.72rem;font-weight:800;color:var(--bad);background:var(--badbg);border-radius:20px;padding:3px 9px;text-transform:none}
+.opt{font-size:.72rem;font-weight:700;color:var(--mute);background:var(--slatebg);border-radius:20px;padding:3px 9px}
+.lbl{display:block;font-weight:700;color:var(--ink2);margin:14px 0 7px;font-size:.95rem}
+.lbl:first-child{margin-top:0}
+.field{position:relative}
+.field input,.field select,.field textarea,input.plain{width:100%;min-height:58px;border:2px solid var(--line2);border-radius:14px;padding:12px 14px;background:#fff;font-size:1.05rem}
+.field textarea{min-height:90px;resize:vertical}
+.field input.bignum{font-size:1.9rem;font-weight:800;padding-right:70px;letter-spacing:.3px;font-variant-numeric:tabular-nums}
+.field .unit{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-weight:800;color:var(--mute);font-size:1rem;pointer-events:none}
+.field input:focus,.field select:focus,.field textarea:focus,input.plain:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 4px var(--brand2)}
+.field.bad input,.field.bad select,.field.bad textarea{border-color:var(--bad);background:#FFF8F7}
+.emsg{display:none;color:var(--bad);font-weight:700;font-size:.9rem;margin-top:7px;align-items:center;gap:6px}
+.emsg.show{display:flex}
+.hint{color:var(--mute);font-size:.85rem;margin-top:6px}
+::placeholder{color:#B3B0A8;font-weight:500;opacity:1}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+
+.prev{display:flex;justify-content:space-between;align-items:center;background:var(--brand2);border-radius:14px;padding:12px 14px}
+.prev span{font-weight:700;color:var(--ink2);font-size:.9rem}
+.prev b{font-size:1.5rem;font-weight:800}
+.calc{margin-top:10px;border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:700}
+.calc b{font-size:1.45rem;font-weight:800;white-space:nowrap}
+.c-ok{background:var(--okbg);color:var(--ok)}.c-warn{background:var(--warnbg);color:var(--warn)}.c-bad{background:var(--badbg);color:var(--bad)}.c-info{background:var(--slatebg);color:var(--ink2)}
+
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg button{min-height:56px;border-radius:14px;border:2px solid var(--line2);background:#fff;font-weight:800;font-size:1rem}
+.seg button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.cond{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cond button{min-height:78px;border-radius:16px;border:2px solid var(--line2);background:#fff;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:.98rem}
+.cond button i{width:14px;height:14px;border-radius:50%;display:block}
+.cond button.on{border-width:3px}
+.cond [data-v=W] i{background:var(--ok)}.cond [data-v=W].on{border-color:var(--ok);background:var(--okbg);color:var(--ok)}
+.cond [data-v=I] i{background:#A0A6AE}.cond [data-v=I].on{border-color:var(--slate);background:var(--slatebg)}
+.cond [data-v=B] i{background:var(--bad)}.cond [data-v=B].on{border-color:var(--bad);background:var(--badbg);color:var(--bad)}
+.cond [data-v=N] i{background:var(--blue)}.cond [data-v=N].on{border-color:var(--blue);background:var(--bluebg);color:var(--blue)}
+
+.photos{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.photos.one{grid-template-columns:1fr}
+.ph{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:150px;border:2.5px dashed var(--line2);border-radius:16px;background:#FCFBF8;text-align:center;padding:12px;cursor:pointer;overflow:hidden}
+.ph input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.ph svg{width:40px;height:40px;color:var(--ink2)}
+.ph b{font-size:.92rem;font-weight:800;line-height:1.2}
+.ph small{color:var(--mute);font-size:.78rem;font-weight:600}
+.ph.has{border-style:solid;border-color:var(--ok);padding:0}
+.ph.has img{width:100%;height:150px;object-fit:cover;display:block}
+.ph .retake{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.7);color:#fff;font-weight:700;font-size:.78rem;border-radius:20px;padding:5px 10px;pointer-events:none}
+.ph .tick{position:absolute;right:8px;top:8px;width:30px;height:30px;border-radius:50%;background:var(--ok);display:grid;place-items:center;pointer-events:none}
+.ph .tick svg{width:18px;height:18px;color:#fff}
+.ph.bad{border-color:var(--bad);background:#FFF8F7}
+.ph.hidden{display:none}
+
+.mhead{display:flex;align-items:center;gap:14px}
+.mhead .mic{width:64px;height:64px}
+.mhead .mic svg{width:40px;height:40px}
+.mhead b{font-size:1.2rem;font-weight:800;display:block;line-height:1.2}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tag{font-size:.78rem;font-weight:700;background:var(--slatebg);color:var(--ink2);border-radius:8px;padding:3px 8px}
+
+/* bottom bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+.bar .in{max-width:620px;margin:0 auto;display:flex;gap:10px}
+.btn{flex:1;min-height:60px;border-radius:16px;border:0;font-weight:800;font-size:1.12rem;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn svg{width:24px;height:24px}
+.btn.pri{background:var(--ink);color:#fff}
+.btn.yel{background:var(--brand);color:var(--ink)}
+.btn.sec{background:#fff;border:2px solid var(--line2);color:var(--ink)}
+.btn:disabled{opacity:.6}
+.spin{width:22px;height:22px;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* done screen */
+.done{text-align:center;padding:26px 16px}
+.done .ok{width:96px;height:96px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:var(--okbg)}
+.done .ok svg{width:58px;height:58px}
+.done.q .ok{background:var(--warnbg)}
+.done h2{font-size:1.4rem;margin:4px 0 6px;font-weight:800}
+.sum{text-align:left;margin-top:14px;border-top:1px solid var(--line)}
+.sum div{display:flex;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line)}
+.sum span{color:var(--mute);font-weight:600}
+.sum b{font-weight:800;text-align:right}
+
+/* people */
+.people{display:grid;grid-template-columns:1fr;gap:10px}
+.person{display:flex;align-items:center;gap:14px;border:2px solid var(--line);background:#fff;border-radius:16px;padding:12px 14px;text-align:left;font-weight:800;font-size:1.05rem;min-height:70px}
+.person .avatar{width:46px;height:46px;font-size:1rem}
+.person.on{border-color:var(--ink);background:var(--brand2)}
+
+.banner{display:flex;align-items:center;gap:10px;background:var(--warnbg);color:var(--warn);border-radius:14px;padding:12px 14px;font-weight:700;margin-bottom:14px}
+.banner button{margin-left:auto;border:0;background:var(--warn);color:#fff;border-radius:10px;padding:8px 12px;font-weight:800;min-height:40px}
+.banner.demo{background:var(--bluebg);color:var(--blue)}
+
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:var(--ink);color:#fff;font-weight:700;border-radius:14px;padding:12px 18px;opacity:0;pointer-events:none;transition:.25s;z-index:40;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.load{display:flex;flex-direction:column;align-items:center;gap:14px;padding:60px 0;color:var(--mute);font-weight:700}
+.load .spin{width:40px;height:40px;border-color:var(--line);border-top-color:var(--ink)}
 .hide{display:none!important}
-@media(prefers-reduced-motion:no-preference){.done svg{animation:pop .4s ease-out}@keyframes pop{from{transform:scale(.6);opacity:0}}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media(max-width:360px){html{font-size:16px}.acts{gap:10px}.act{padding:14px 12px}}
 </style>
 </head>
 <body>
-<header class="top"><div class="row"><div><h1 id="pname">Siraha Pkg 10</h1><small id="today"></small></div><div class="row"><button class="chip" id="lang">नेपाली</button><button class="chip" id="who">—</button></div></div></header>
+<header class="top"><div class="in">
+  <button class="iconbtn hide" id="back" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div class="ttl"><b id="ttl">Site log</b><small id="sub"></small></div>
+  <div class="lang" role="group" aria-label="Language"><button data-lang="en">EN</button><button data-lang="ne">नेपाली</button></div>
+</div></header>
+<div class="net" id="net"></div>
 <main class="wrap" id="app"></main>
-<div class="bar hide" id="bar"><div class="in"><button class="btn sec" id="back"></button><button class="btn pri" id="save"></button></div></div>
+<div class="bar hide" id="bar"><div class="in" id="barin"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 {
+/* ================= connection ================= */
 const IS_GAS = typeof google !== 'undefined' && google.script && google.script.run;
-// Office link that writes into the Google Sheet. Leave empty for the practice version.
+// Office link that writes into the Google Sheet. Add ?demo to the page address for the practice version.
 const API = /[?&]demo/.test(location.search) ? '' : 'https://script.google.com/macros/s/AKfycbxk3hJSOQjAr8H01YvuBF09z85zB_teazPPPc7xSMhusEOX0kFv2nauJuVBnJnHRyBO6A/exec';
 const LIVE = !!(IS_GAS || API);
 const $ = s => document.querySelector(s);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch (e) { return d } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)) } catch (e) {} } };
+const store = {get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch (e) { return d } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)) } catch (e) {} }};
 
-/* ---------- words (English / Nepali) ---------- */
+/* ================= words ================= */
 const W = {
- en:{log:'Machine / vehicle log',fuelin:'Fuel received',dip:'Tank check',bd:'Breakdown report',logged:'logged today',pending:'Pending',done:'Logged',all:'All machines and vehicles',start:'Start reading (yesterday’s end)',end:'End reading now',used:'Used',fuel:'Fuel issued (litres)',cond:'Condition',work:'Work / chainage / trip purpose',idle:'Idle hours',bdh:'Breakdown hours',mphoto:'Photo of meter / odometer',fphoto:'Photo of fuel slip',tap:'Tap to take photo',save:'Save',back:'Back',saved:'Saved and sent to office',next:'Log next machine',home:'Home',W:'Working',I:'Idle',B:'Breakdown',N:'Not at site',normal:'normal',high:'above normal – office will ask',low:'below normal – office will ask',fueltype:'Fuel',qty:'Litres received',rate:'Rate (NPR per litre)',supp:'Supplier',bill:'Bill / challan no.',bphoto:'Photo of bill',meas:'Litres measured in tank',book:'Book stock',diff:'Difference',fault:'What is the problem?',eta:'Expected repair date',bdphoto:'Photo of the problem',dphoto:'Photo of tank / dip stick',day:'Log for',tdy:'Today',yst:'Yesterday',pick:'Who is entering?',queue:'waiting to send – will send when internet returns',sample:'Practice version: sample machines, nothing is sent'},
- ne:{log:'मेसिन / गाडी लग',fuelin:'इन्धन प्राप्त',dip:'ट्यांकी जाँच',bd:'बिग्रिएको रिपोर्ट',logged:'आज लग भयो',pending:'बाँकी',done:'लग भयो',all:'सबै मेसिन र गाडी',start:'सुरु रिडिङ (हिजोको अन्तिम)',end:'अहिलेको अन्तिम रिडिङ',used:'प्रयोग',fuel:'दिएको इन्धन (लिटर)',cond:'अवस्था',work:'काम / चेनेज / यात्राको कारण',idle:'खाली बसेको घण्टा',bdh:'बिग्रिएको घण्टा',mphoto:'मिटर / ओडोमिटरको फोटो',fphoto:'इन्धन पर्चीको फोटो',tap:'फोटो खिच्न थिच्नुहोस्',save:'सेभ गर्नुहोस्',back:'पछाडि',saved:'सेभ भयो र अफिसमा पठाइयो',next:'अर्को मेसिन लग गर्नुहोस्',home:'गृह',W:'काम गर्दै',I:'खाली',B:'बिग्रिएको',N:'साइटमा छैन',normal:'सामान्य',high:'सामान्यभन्दा बढी – अफिसले सोध्नेछ',low:'सामान्यभन्दा कम – अफिसले सोध्नेछ',fueltype:'इन्धन',qty:'प्राप्त लिटर',rate:'दर (प्रति लिटर रु.)',supp:'सप्लायर',bill:'बिल / चलान नं.',bphoto:'बिलको फोटो',meas:'ट्यांकीमा नापेको लिटर',book:'हिसाबको मौज्दात',diff:'फरक',fault:'के समस्या छ?',eta:'मर्मत हुने मिति',bdphoto:'समस्याको फोटो',dphoto:'ट्यांकी / डिप स्टिकको फोटो',day:'लगको मिति',tdy:'आज',yst:'हिजो',pick:'कसले भर्दै हुनुहुन्छ?',queue:'पठाउन बाँकी – इन्टरनेट आएपछि जानेछ',sample:'अभ्यास संस्करण: नमूना मेसिन, केही पठाइँदैन'}
+en:{hello:'Namaste',today:'Today',logged:'logged',left:'left to log',allDone:'All machines logged today',log:'Log a machine',logS:'Meter reading, fuel, condition',fuelin:'Fuel received',fuelinS:'Diesel or petrol came to site',dip:'Tank check',dipS:'Measure fuel in the tank',bd:'Breakdown',bdS:'Machine has a problem',pendT:'Still to log today',doneT:'Logged today',none:'Nothing here',search:'Search machine or number',all:'All',pending:'Pending',done:'Logged',
+ day:'Which day is this for?',tdy:'Today',yst:'Yesterday',reading:'Meter reading',prevR:'Last reading',startR:'Starting reading',endR:'Reading now (end of work)',worked:'Worked',fuel:'Fuel given',fuelL:'Litres put in this machine',fuelHint:'Write 0 if no fuel was given',eff:'Fuel use',normal:'Normal',high:'Too high – office will check',low:'Too low – office will check',
+ cond:'Machine condition',W:'Working',I:'Idle',B:'Breakdown',N:'Not at site',idle:'Idle hours',bdh:'Breakdown hours',work:'Work done',workPh:'e.g. Excavation at Ch 2+450 to 2+600',photos:'Photos',mphoto:'Meter photo',fphoto:'Fuel slip photo',tap:'Tap to take photo',retake:'Tap to retake',needed:'Needed',optional:'Optional',ifFuel:'Needed when fuel given',
+ fueltype:'Which fuel?',qty:'Litres received',rate:'Rate per litre (Rs.)',supp:'Supplier / pump name',bill:'Bill or challan number',bphoto:'Bill photo',book:'Should be in tank (book)',meas:'Measured in tank now',diff:'Difference',dphoto:'Dip stick / tank photo',whichM:'Which machine?',fault:'What is the problem?',faultPh:'e.g. Hydraulic hose burst, machine stopped',eta:'When will it be repaired?',bdphoto:'Photo of the problem',
+ save:'Save',saving:'Sending…',saved:'Saved and sent to office',savedS:'The office can see it now.',queued:'Saved on this phone',queuedS:'No internet. It will send by itself when internet comes back.',next:'Next machine',lhr:'L/hr',home:'Home',
+ pick:'Who is entering today?',other:'Someone else – write name',ok:'Continue',change:'Change',fix:'Please fix the red boxes',req:'Please fill this',photoReq:'Please take this photo',endLess:'Cannot be less than last reading',tooMany:'More than 24 hours in one day – check the reading',offline:'No internet – entries will be saved on this phone and sent later',waiting:'waiting to send',sendNow:'Send now',demo:'Practice mode – sample machines, nothing is sent to office',loadErr:'Could not load. Check internet and open again.',retry:'Try again',machines:'machines',hrs:'hrs',km:'km'},
+ne:{hello:'नमस्ते',today:'आज',logged:'लग भयो',left:'लग गर्न बाँकी',allDone:'आज सबै मेसिन लग भयो',log:'मेसिन लग गर्नुहोस्',logS:'मिटर रिडिङ, इन्धन, अवस्था',fuelin:'इन्धन आयो',fuelinS:'साइटमा डिजेल वा पेट्रोल आयो',dip:'ट्यांकी जाँच',dipS:'ट्यांकीको इन्धन नाप्नुहोस्',bd:'मेसिन बिग्रियो',bdS:'मेसिनमा समस्या छ',pendT:'आज लग गर्न बाँकी',doneT:'आज लग भएका',none:'केही छैन',search:'मेसिन वा नम्बर खोज्नुहोस्',all:'सबै',pending:'बाँकी',done:'लग भयो',
+ day:'कुन दिनको लग हो?',tdy:'आज',yst:'हिजो',reading:'मिटर रिडिङ',prevR:'अघिल्लो रिडिङ',startR:'सुरुको रिडिङ',endR:'अहिलेको रिडिङ (काम सकिँदा)',worked:'काम गरेको',fuel:'दिएको इन्धन',fuelL:'यो मेसिनमा हालेको लिटर',fuelHint:'इन्धन नदिएको भए ० लेख्नुहोस्',eff:'इन्धन खपत',normal:'ठीक छ',high:'धेरै भयो – अफिसले जाँच्छ',low:'कम भयो – अफिसले जाँच्छ',
+ cond:'मेसिनको अवस्था',W:'काम गर्दै',I:'खाली बसेको',B:'बिग्रिएको',N:'साइटमा छैन',idle:'खाली बसेको घण्टा',bdh:'बिग्रिएको घण्टा',work:'गरेको काम',workPh:'जस्तै: चेनेज २+४५० देखि २+६०० खन्ने',photos:'फोटो',mphoto:'मिटरको फोटो',fphoto:'इन्धन पर्चीको फोटो',tap:'फोटो खिच्न थिच्नुहोस्',retake:'फेरि खिच्न थिच्नुहोस्',needed:'अनिवार्य',optional:'चाहिए मात्र',ifFuel:'इन्धन दिए अनिवार्य',
+ fueltype:'कुन इन्धन?',qty:'आएको लिटर',rate:'प्रति लिटर दर (रु.)',supp:'सप्लायर / पम्पको नाम',bill:'बिल वा चलान नम्बर',bphoto:'बिलको फोटो',book:'ट्यांकीमा हुनुपर्ने (हिसाब)',meas:'अहिले ट्यांकीमा नापेको',diff:'फरक',dphoto:'डिप स्टिक / ट्यांकीको फोटो',whichM:'कुन मेसिन?',fault:'के समस्या छ?',faultPh:'जस्तै: हाइड्रोलिक पाइप फुट्यो, मेसिन रोकियो',eta:'कहिले बन्छ?',bdphoto:'समस्याको फोटो',
+ save:'सेभ गर्नुहोस्',saving:'पठाउँदै…',saved:'सेभ भयो, अफिसमा पुग्यो',savedS:'अफिसले अहिले नै हेर्न सक्छ।',queued:'फोनमा सेभ भयो',queuedS:'इन्टरनेट छैन। इन्टरनेट आएपछि आफैं पठाउँछ।',next:'अर्को मेसिन',lhr:'लि./घण्टा',home:'गृहपृष्ठ',
+ pick:'आज को भर्दै हुनुहुन्छ?',other:'अरू कोही – नाम लेख्नुहोस्',ok:'अगाडि बढ्नुहोस्',change:'बदल्नुहोस्',fix:'रातो बाकस भर्नुहोस्',req:'यो भर्नुहोस्',photoReq:'यो फोटो खिच्नुहोस्',endLess:'अघिल्लो रिडिङभन्दा कम हुन सक्दैन',tooMany:'एक दिनमा २४ घण्टाभन्दा बढी – रिडिङ जाँच्नुहोस्',offline:'इन्टरनेट छैन – फोनमा सेभ हुन्छ, पछि पठाउँछ',waiting:'पठाउन बाँकी',sendNow:'अहिले पठाउनुहोस्',demo:'अभ्यास मात्र – नमूना मेसिन, अफिसमा केही जाँदैन',loadErr:'खुलेन। इन्टरनेट जाँचेर फेरि खोल्नुहोस्।',retry:'फेरि प्रयास',machines:'मेसिन',hrs:'घण्टा',km:'कि.मि.'}
 };
 let L = store.get('cl_lang', 'en');
-const t = k => W[L][k] || W.en[k] || k;
+const t = k => (W[L] && W[L][k]) || W.en[k] || k;
 
-/* ---------- dates: AD and BS ---------- */
+/* ================= dates (AD + BS) ================= */
 const BS = {2083:['2026-04-14','2026-05-15','2026-06-15','2026-07-17','2026-08-17','2026-09-17','2026-10-18','2026-11-17','2026-12-16','2027-01-15','2027-02-13','2027-03-15'],2084:['2027-04-14','2027-05-15','2027-06-15','2027-07-17','2027-08-17','2027-09-17','2027-10-17','2027-11-16','2027-12-16','2028-01-14','2028-02-13','2028-03-14']};
+const BSM = {en:['Baisakh','Jestha','Asar','Shrawan','Bhadra','Asoj','Kartik','Mangsir','Poush','Magh','Falgun','Chaitra'],ne:['बैशाख','जेठ','असार','साउन','भदौ','असोज','कात्तिक','मंसिर','पुस','माघ','फागुन','चैत']};
 const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-function toBS(d) { const s = iso(d); let out = ''; for (const y in BS) BS[y].forEach((m, i) => { if (m <= s) { const days = Math.round((new Date(s) - new Date(m)) / 864e5) + 1; out = y + '-' + String(i + 1).padStart(2, '0') + '-' + String(days).padStart(2, '0') } }); return out }
-const fmt = d => d.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
+function toBS(d) { const s = iso(d); let out = null; for (const y in BS) BS[y].forEach((m, i) => { if (m <= s) out = {y, m: i, d: Math.round((new Date(s) - new Date(m)) / 864e5) + 1} }); return out }
+function dateLine(d) { const b = toBS(d), ad = d.toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short'}); return b ? `${ad} · ${b.d} ${BSM[L][b.m]} ${b.y}` : ad }
 
-/* ---------- practice data (used only outside Google) ---------- */
+/* ================= practice data ================= */
 const MOCK = (() => {
   const mk = (id, name, cat, meter, fuel, min, max, last) => ({id, name, cat, meter, fuel, min, max, last});
-  const data = {project: 'Siraha Pkg 10 (Sample)', staff: ['Store keeper', 'Timekeeper', 'Site in-charge'], stock: {Diesel: 438, Petrol: 16.5},
+  const data = {project: 'Siraha Pkg 10 (Practice)', staff: ['Store keeper', 'Timekeeper', 'Site in-charge'], stock: {Diesel: 438, Petrol: 16.5},
     machines: [mk('SMP-EXC-01','Excavator 20 t','Heavy machine','Hour','Diesel',12,17,4236), mk('SMP-LDR-01','Wheel loader','Heavy machine','Hour','Diesel',9,14,1057), mk('SMP-GRD-01','Motor grader','Heavy machine','Hour','Diesel',10,15,6133), mk('SMP-ROL-01','Vibratory roller 10 t','Heavy machine','Hour','Diesel',6,10,2311), mk('SMP-TIP-01','Tipper 10-wheel','Tipper','Km','Diesel',2.5,4,58508), mk('SMP-WTR-01','Water bowser','Tanker','Km','Diesel',3,4.5,31506), mk('SMP-PKP-01','Pickup (site)','Light vehicle','Km','Diesel',9,13,84763), mk('SMP-MCY-01','Motorbike (survey)','Motorbike','Km','Petrol',35,50,22455)],
     logged: {}};
   return {init: () => data, saveLog: r => { data.logged[r.date + '|' + r.id] = 1; const m = data.machines.find(x => x.id === r.id); if (r.date === iso(new Date())) m.last = +r.end; data.stock[m.fuel] -= +r.fuel || 0; return {ok: true} },
@@ -111,200 +261,332 @@ const call = (fn, arg) => new Promise((res, rej) => {
   if (IS_GAS) google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](arg);
   else if (API) fetch(API, {method: 'POST', body: JSON.stringify({fn, arg}), redirect: 'follow'})
     .then(r => r.json()).then(j => j.ok ? res(j.data) : rej(new Error(j.error))).catch(rej);
-  else setTimeout(() => { try { res(MOCK[fn](arg)) } catch (e) { rej(e) } }, 350);
+  else setTimeout(() => { try { res(MOCK[fn](arg)) } catch (e) { rej(e) } }, 400);
 });
 
-/* ---------- icons ---------- */
-const ICON = {
-  'Heavy machine': '<svg viewBox="0 0 32 32"><rect x="3" y="20" width="16" height="6" rx="3" fill="#1c1c1c"/><rect x="6" y="13" width="10" height="7" fill="#f2b705" stroke="#1c1c1c"/><path d="M16 15 L24 7 L29 12" stroke="#1c1c1c" stroke-width="2.5" fill="none"/><path d="M27 12 l3 5 h-6z" fill="#1c1c1c"/></svg>',
-  Tipper: '<svg viewBox="0 0 32 32"><path d="M3 10h16v10H3z" fill="#f2b705" stroke="#1c1c1c"/><path d="M19 13h6l4 4v3H19z" fill="#1c1c1c"/><circle cx="8" cy="23" r="3" fill="#1c1c1c"/><circle cx="24" cy="23" r="3" fill="#1c1c1c"/></svg>',
-  Tanker: '<svg viewBox="0 0 32 32"><rect x="3" y="11" width="17" height="9" rx="4.5" fill="#f2b705" stroke="#1c1c1c"/><path d="M20 13h5l4 4v3h-9z" fill="#1c1c1c"/><circle cx="8" cy="23" r="3" fill="#1c1c1c"/><circle cx="24" cy="23" r="3" fill="#1c1c1c"/></svg>',
-  'Light vehicle': '<svg viewBox="0 0 32 32"><path d="M4 19l3-7h12l5 4h4v5H4z" fill="#f2b705" stroke="#1c1c1c"/><circle cx="9" cy="22" r="3" fill="#1c1c1c"/><circle cx="23" cy="22" r="3" fill="#1c1c1c"/></svg>',
-  Motorbike: '<svg viewBox="0 0 32 32"><circle cx="8" cy="21" r="5" fill="none" stroke="#1c1c1c" stroke-width="2.5"/><circle cx="24" cy="21" r="5" fill="none" stroke="#1c1c1c" stroke-width="2.5"/><path d="M8 21l6-8h6l4 8M16 13l-2-4h-3" stroke="#1c1c1c" stroke-width="2.5" fill="none"/></svg>'
+/* ================= icons ================= */
+const S = (p, vb = '0 0 24 24') => `<svg viewBox="${vb}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const I = {
+  cam: S('<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'),
+  check: S('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+  chev: S('<path d="M9 5l7 7-7 7"/>'),
+  search: S('<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>'),
+  warn: S('<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17v.5"/>'),
+  log: S('<rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8.5h6M9 12h6M9 15.5h3.5"/>'),
+  fuel: S('<path d="M5 20V5.5A1.5 1.5 0 0 1 6.5 4h6A1.5 1.5 0 0 1 14 5.5V20M4 20h11M5 10h9"/><path d="M14 8l3 2.5v6a1.5 1.5 0 0 0 3 0V9l-2.5-2.5"/>'),
+  dip: S('<rect x="4" y="8" width="16" height="12" rx="2.5"/><path d="M4 14.5h16"/><path d="M12 3v9"/>'),
+  bd: S('<path d="M14.5 6.5a3.5 3.5 0 0 0-4.6 4.6L4 17l3 3 5.9-5.9a3.5 3.5 0 0 0 4.6-4.6l-2.2 2.2-2.1-.6-.6-2.1z"/>'),
+  home: S('<path d="M4 11l8-6.5 8 6.5V20h-5v-5h-6v5H4z"/>'),
+  send: S('<path d="M4 12l16-8-6 16-2.5-6.5z"/>'),
+  user: S('<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-3.5 3.8-5.5 7-5.5s6 2 7 5.5"/>')
 };
-const icon = c => ICON[c] || ICON['Heavy machine'];
-const TILE = {
-  log: '<svg viewBox="0 0 32 32"><rect x="6" y="4" width="20" height="24" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M11 11h10M11 16h10M11 21h6" stroke="currentColor" stroke-width="2.5"/></svg>',
-  fuelin: '<svg viewBox="0 0 32 32"><path d="M8 28V6h11v22M8 15h11" stroke="currentColor" stroke-width="2.5" fill="none"/><path d="M19 10l5 4v10a2 2 0 0 0 4 0V12" stroke="currentColor" stroke-width="2.5" fill="none"/></svg>',
-  dip: '<svg viewBox="0 0 32 32"><rect x="5" y="9" width="22" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M5 19h22" stroke="#f2b705" stroke-width="3"/><path d="M16 3v14" stroke="currentColor" stroke-width="2.5"/></svg>',
-  bd: '<svg viewBox="0 0 32 32"><path d="M16 4l13 23H3z" fill="none" stroke="#c0392b" stroke-width="2.5"/><path d="M16 12v7M16 22v2" stroke="#c0392b" stroke-width="3"/></svg>'
+const MI = {
+  'Heavy machine': '<svg viewBox="0 0 40 40"><rect x="4" y="27" width="20" height="7" rx="3.5" fill="#16181B"/><circle cx="9" cy="30.5" r="1.6" fill="#F2B705"/><circle cx="19" cy="30.5" r="1.6" fill="#F2B705"/><rect x="7" y="17" width="13" height="10" rx="1.5" fill="#F2B705" stroke="#16181B" stroke-width="1.6"/><rect x="9.5" y="19" width="5" height="4.5" fill="#BFE3F2" stroke="#16181B" stroke-width="1.2"/><path d="M20 20L29 10l6 7" stroke="#16181B" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M33 16l4 6h-7z" fill="#16181B"/></svg>',
+  Tipper: '<svg viewBox="0 0 40 40"><path d="M3 12h20v13H3z" fill="#F2B705" stroke="#16181B" stroke-width="1.6"/><path d="M23 16h7l5 5v4H23z" fill="#16181B"/><rect x="25" y="17.5" width="4" height="3" fill="#BFE3F2"/><circle cx="9" cy="28" r="3.6" fill="#16181B"/><circle cx="29" cy="28" r="3.6" fill="#16181B"/></svg>',
+  Tanker: '<svg viewBox="0 0 40 40"><rect x="3" y="13" width="21" height="11" rx="5.5" fill="#7CC4E8" stroke="#16181B" stroke-width="1.6"/><path d="M24 16h6l5 5v4H24z" fill="#16181B"/><circle cx="9" cy="28" r="3.6" fill="#16181B"/><circle cx="29" cy="28" r="3.6" fill="#16181B"/></svg>',
+  'Light vehicle': '<svg viewBox="0 0 40 40"><path d="M4 24l4-8h14l6 5h7v6H4z" fill="#F2B705" stroke="#16181B" stroke-width="1.6"/><path d="M11 17h6v4H9z" fill="#BFE3F2"/><circle cx="11" cy="28" r="3.6" fill="#16181B"/><circle cx="29" cy="28" r="3.6" fill="#16181B"/></svg>',
+  Motorbike: '<svg viewBox="0 0 40 40"><circle cx="10" cy="26" r="6" fill="none" stroke="#16181B" stroke-width="3"/><circle cx="30" cy="26" r="6" fill="none" stroke="#16181B" stroke-width="3"/><path d="M10 26l8-10h7l5 10M20 16l-3-5h-4" stroke="#16181B" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M17 20h9" stroke="#F2B705" stroke-width="4" stroke-linecap="round"/></svg>'
 };
+const micon = c => MI[c] || MI['Heavy machine'];
 
-/* ---------- state ---------- */
-let D = null, view = 'home', cur = null, F = {}, busy = false;
+/* ================= state ================= */
+let D = null, view = 'home', cur = null, F = {}, busy = false, filter = 'pending', q = '', last = null;
 const queue = () => store.get('cl_queue', []);
 const user = () => store.get('cl_user', '');
+const loggedOn = (id, d) => D && D.logged[d + '|' + id];
+const loggedToday = id => loggedOn(id, iso(new Date()));
+const unitOf = m => m.meter === 'Hour' ? t('hrs') : t('km');
+const initials = s => String(s).trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+const fmtN = n => (Math.round(n * 10) / 10).toLocaleString('en-IN');
 
-function header() {
-  const d = new Date();
-  $('#pname').textContent = D ? D.project : 'Site log';
-  $('#today').textContent = fmt(d) + ' · ' + toBS(d) + ' BS';
-  $('#lang').textContent = L === 'en' ? 'नेपाली' : 'English';
-  $('#who').textContent = user() || t('pick');
+function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2600) }
+function header(title, sub, back) {
+  $('#ttl').textContent = title || (D ? D.project : 'Site log');
+  $('#sub').textContent = sub ?? dateLine(new Date());
+  $('#back').classList.toggle('hide', !back);
+  document.querySelectorAll('[data-lang]').forEach(b => b.classList.toggle('on', b.dataset.lang === L));
+  document.documentElement.lang = L === 'ne' ? 'ne' : 'en';
 }
-const loggedToday = id => D.logged[iso(new Date()) + '|' + id];
+function bar(html) { $('#barin').innerHTML = html || ''; $('#bar').classList.toggle('hide', !html) }
+function netLine() { const n = $('#net'); n.textContent = t('offline'); n.classList.toggle('show', !navigator.onLine) }
 
-/* ---------- views ---------- */
-function home() {
-  const ms = D.machines, n = ms.filter(m => loggedToday(m.id)).length, pct = ms.length ? n / ms.length : 0;
-  const q = queue().length;
-  $('#app').innerHTML = (LIVE ? '' : `<p class="note">${t('sample')}</p>`) + (q ? `<div class="q">${q} ${t('queue')}</div>` : '') + `
-  <div class="card prog"><svg class="ring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--line)" stroke-width="5"/><circle cx="18" cy="18" r="15" fill="none" stroke="#f2b705" stroke-width="5" stroke-dasharray="${(pct * 94.2).toFixed(1)} 94.2" transform="rotate(-90 18 18)" stroke-linecap="round"/></svg>
-  <div><b>${n} / ${ms.length}</b><div>${t('logged')}</div></div></div>
-  <div class="tiles">${['log', 'fuelin', 'dip', 'bd'].map(k => `<button class="tile" data-go="${k}">${TILE[k]}<span>${t(k)}</span></button>`).join('')}</div>
-  <div class="card"><h2>${t('all')}</h2>${ms.map(m => `<button class="m" data-m="${esc(m.id)}"><div class="ic">${icon(m.cat)}</div><div class="nm">${esc(m.name)}<small>${esc(m.id)} · ${esc(m.meter === 'Hour' ? 'hrs' : 'km')} ${esc(m.last ?? '—')}</small></div><span class="tag ${loggedToday(m.id) ? 'ok' : 'pend'}">${loggedToday(m.id) ? t('done') : t('pending')}</span></button>`).join('')}</div>`;
-  $('#bar').classList.add('hide');
-}
-
-function seg(name, opts, val) { return `<div class="seg" data-seg="${name}">${opts.map(([v, lbl]) => `<button type="button" data-v="${esc(v)}" class="${v === val ? 'on' : ''}">${esc(lbl)}</button>`).join('')}</div>` }
-function photo(name, lbl) { return `<label>${lbl}</label><label class="photo" for="ph_${name}"><img id="im_${name}" class="${F[name] ? '' : 'hide'}" src="${F[name] || ''}" alt=""><span>${t('tap')}</span><input type="file" accept="image/*" capture="environment" id="ph_${name}" data-ph="${name}"></label>` }
-
-function pickMachine() {
-  $('#app').innerHTML = `<div class="card"><h2>${t('log')}</h2>${D.machines.map(m => `<button class="m" data-m="${esc(m.id)}"><div class="ic">${icon(m.cat)}</div><div class="nm">${esc(m.name)}<small>${esc(m.id)}</small></div><span class="tag ${loggedToday(m.id) ? 'ok' : 'pend'}">${loggedToday(m.id) ? t('done') : t('pending')}</span></button>`).join('')}</div>`;
-  showBar(false);
+/* ================= views ================= */
+function vUser() {
+  header(t('pick'), D ? D.project : '', !!user());
+  const u = user();
+  $('#app').innerHTML = `<div class="card"><div class="people">${D.staff.map(s => `<button class="person ${s === u ? 'on' : ''}" data-user="${esc(s)}"><span class="avatar">${esc(initials(s))}</span>${esc(s)}</button>`).join('')}</div>
+   <label class="lbl" for="oth" style="margin-top:18px">${t('other')}</label><div class="field"><input id="oth" type="text" autocomplete="name"></div></div>`;
+  bar(`<button class="btn pri" id="othok">${t('ok')}</button>`);
 }
 
-function logForm() {
-  const m = cur, unit = m.meter === 'Hour' ? 'hrs' : 'km';
+function vHome() {
+  header('', null, false);
+  const ms = D.machines, done = ms.filter(m => loggedToday(m.id)), pend = ms.filter(m => !loggedToday(m.id));
+  const n = done.length, tot = ms.length, pct = tot ? Math.round(n / tot * 100) : 0, qn = queue().length;
+  $('#app').innerHTML = (LIVE ? '' : `<div class="banner demo">${t('demo')}</div>`)
+  + (qn ? `<div class="banner">${I.warn.replace('<svg', '<svg width="22" height="22"')}<span>${qn} ${t('waiting')}</span><button id="flush">${t('sendNow')}</button></div>` : '')
+  + `<div class="card"><div class="hello"><span class="avatar">${esc(initials(user()))}</span><div style="flex:1"><b>${t('hello')}, ${esc(user())}</b><p class="sub">${esc(D.project)}</p></div><button class="btn sec" id="who" style="flex:none;min-height:44px;padding:0 14px;font-size:.88rem">${t('change')}</button></div>
+     <div class="prog"><div class="row"><div class="big num">${n}<span> / ${tot} ${t('logged')}</span></div><b style="color:${pend.length ? 'var(--warn)' : 'var(--ok)'}">${pend.length ? pend.length + ' ' + t('left') : '✓ ' + t('allDone')}</b></div>
+     <div class="meter ${pct === 100 ? 'full' : ''}"><i style="width:${pct}%"></i></div></div></div>
+   <div class="acts">
+     <button class="act main" data-go="pickM"><span class="ico" style="color:var(--ink)">${I.log}</span><span><b style="font-size:1.15rem">${t('log')}</b><br><small>${t('logS')}</small></span><span class="go">${I.chev}</span></button>
+     <button class="act" data-go="fuelin"><span class="ico b">${I.fuel}</span><b>${t('fuelin')}</b><small>${t('fuelinS')}</small></button>
+     <button class="act" data-go="dip"><span class="ico t">${I.dip}</span><b>${t('dip')}</b><small>${t('dipS')}</small></button>
+     <button class="act" data-go="bd" style="grid-column:1/-1;flex-direction:row;align-items:center;min-height:84px"><span class="ico r">${I.bd}</span><span><b>${t('bd')}</b><br><small>${t('bdS')}</small></span></button>
+   </div>
+   <div class="h">${t('pendT')} <small>${pend.length}</small></div>
+   <div class="list">${pend.length ? pend.map(rowM).join('') : `<div class="card empty">✓ ${t('allDone')}</div>`}</div>
+   ${done.length ? `<details class="done-list" style="margin-top:16px"><summary><span>${t('doneT')}</span><small class="pill p-ok">${done.length}</small></summary><div class="list">${done.map(rowM).join('')}</div></details>` : ''}`;
+  bar('');
+}
+function rowM(m) {
+  const ok = loggedToday(m.id);
+  return `<button class="mrow" data-m="${esc(m.id)}"><span class="mic">${micon(m.cat)}</span><span class="mname"><b>${esc(m.name)}</b><small>${esc(m.id)} · ${esc(m.last ?? '—')} ${unitOf(m)}</small></span><span class="pill ${ok ? 'p-ok' : 'p-pend'}">${ok ? '✓ ' + t('done') : t('pending')}</span></button>`;
+}
+
+function vPick() {
+  header(t('log'), D.project, true);
+  $('#app').innerHTML = `<div class="search">${I.search}<input class="plain" id="q" type="search" placeholder="${esc(t('search'))}" value="${esc(q)}" autocomplete="off"></div>
+   <div class="seg" style="margin-bottom:14px" data-filter><button data-f="pending" class="${filter === 'pending' ? 'on' : ''}">${t('pending')}</button><button data-f="all" class="${filter === 'all' ? 'on' : ''}">${t('all')}</button></div>
+   <div class="list" id="mlist"></div>`;
+  drawPick(); bar('');
+}
+function drawPick() {
+  const s = q.trim().toLowerCase();
+  const ms = D.machines.filter(m => (filter === 'all' || !loggedToday(m.id)) && (!s || (m.name + ' ' + m.id).toLowerCase().includes(s)));
+  $('#mlist').innerHTML = ms.length ? ms.map(rowM).join('') : `<div class="card empty">${filter === 'pending' && !s ? '✓ ' + t('allDone') : t('none')}</div>`;
+}
+
+const stepH = (n, title, tag) => `<div class="sh"><span class="sn" data-sn="${n}">${n}</span><b>${title}</b>${tag || ''}</div>`;
+const reqT = () => `<span class="req">${t('needed')}</span>`, optT = () => `<span class="opt">${t('optional')}</span>`;
+const emsg = id => `<div class="emsg" id="e_${id}">${I.warn.replace('<svg', '<svg width="18" height="18"')}<span></span></div>`;
+function photoBox(name, label, sub) {
+  const has = F[name];
+  return `<label class="ph ${has ? 'has' : ''}" id="box_${name}">${has ? `<img src="${F[name]}" alt=""><span class="tick">${I.check}</span><span class="retake">${t('retake')}</span>` : `${I.cam}<b>${label}</b><small>${sub || t('tap')}</small>`}<input type="file" accept="image/*" capture="environment" data-ph="${name}" aria-label="${esc(label)}"></label>`;
+}
+const numField = (id, unit, val, ph) => `<div class="field" id="f_${id}"><input id="${id}" class="bignum" type="number" inputmode="decimal" step="any" value="${esc(val ?? '')}" placeholder="${esc(ph ?? '')}"><span class="unit">${esc(unit)}</span></div>${emsg(id)}`;
+
+function vLog() {
+  const m = cur, u = unitOf(m), hasLast = m.last != null && m.last !== '';
   F.day = F.day || 'tdy'; F.cond = F.cond || 'W';
-  $('#app').innerHTML = `<div class="card"><div class="m" style="border:0;padding:0"><div class="ic">${icon(m.cat)}</div><div class="nm"><b>${esc(m.name)}</b><small>${esc(m.id)} · ${esc(m.fuel)}</small></div></div></div>
-  <div class="card"><label>${t('day')}</label>${seg('day', [['tdy', t('tdy')], ['yst', t('yst')]], F.day)}
-  <label>${t('start')}</label><div class="read"><span>${unit}</span><b>${esc(m.last ?? '—')}</b></div>
-  <label for="end">${t('end')} <small>(${unit})</small></label><input id="end" class="big" type="number" inputmode="decimal" value="${esc(F.end ?? '')}">
-  <label for="fuel">${t('fuel')}</label><input id="fuel" class="big" type="number" inputmode="decimal" value="${esc(F.fuel ?? '')}">
-  <div id="gauge"></div>
-  <label>${t('cond')}</label>${seg('cond', [['W', t('W')], ['I', t('I')], ['B', t('B')], ['N', t('N')]], F.cond)}
-  <div class="pair ${m.meter === 'Hour' ? '' : 'hide'}"><div><label for="idle">${t('idle')}</label><input id="idle" type="number" inputmode="decimal" value="${esc(F.idle ?? '')}"></div><div><label for="bdh">${t('bdh')}</label><input id="bdh" type="number" inputmode="decimal" value="${esc(F.bdh ?? '')}"></div></div>
-  <label for="work">${t('work')}</label><input id="work" type="text" value="${esc(F.work ?? '')}" placeholder="e.g. Excavation 2+450–2+600">
-  ${photo('mp', t('mphoto'))}${photo('fp', t('fphoto') + ' <small>(if fuel given)</small>')}
-  <div id="err" class="err"></div></div>`;
-  showBar(true); gauge();
+  header(m.name, m.id + ' · ' + m.fuel, true);
+  $('#app').innerHTML = `
+  <div class="card mhead"><span class="mic">${micon(m.cat)}</span><div><b>${esc(m.name)}</b><div class="tags"><span class="tag">${esc(m.id)}</span><span class="tag">${esc(m.fuel)}</span><span class="tag">${m.meter === 'Hour' ? t('hrs') : t('km')}</span></div></div></div>
+  <section class="step">${stepH(1, t('day'))}<div class="seg" data-seg="day"><button data-v="tdy" class="${F.day === 'tdy' ? 'on' : ''}">${t('tdy')}</button><button data-v="yst" class="${F.day === 'yst' ? 'on' : ''}">${t('yst')}</button></div></section>
+  <section class="step" id="s_read">${stepH(2, t('reading'), reqT())}
+    ${hasLast ? `<div class="prev"><span>${t('prevR')}</span><b class="num">${esc(fmtN(+m.last))} <small style="font-size:.9rem">${u}</small></b></div>` : `<label class="lbl" for="start">${t('startR')}</label>${numField('start', u, F.start)}`}
+    <label class="lbl" for="end">${t('endR')}</label>${numField('end', u, F.end)}
+    <div id="calc1"></div></section>
+  <section class="step" id="s_fuel">${stepH(3, t('fuel'))}
+    <label class="lbl" for="fuel">${t('fuelL')}</label>${numField('fuel', 'L', F.fuel, '0')}<div class="hint">${t('fuelHint')}</div>
+    <div id="calc2"></div></section>
+  <section class="step" id="s_cond">${stepH(4, t('cond'))}
+    <div class="cond" data-seg="cond">${['W', 'I', 'B', 'N'].map(v => `<button data-v="${v}" class="${F.cond === v ? 'on' : ''}"><i></i>${t(v)}</button>`).join('')}</div>
+    <div id="bdhWrap" class="${F.cond === 'B' ? '' : 'hide'}"><label class="lbl" for="bdh">${t('bdh')}</label>${numField('bdh', t('hrs'), F.bdh)}</div>
+    <div id="idleWrap" class="${m.meter === 'Hour' && F.cond !== 'N' ? '' : 'hide'}"><label class="lbl" for="idle">${t('idle')} <span class="opt">${t('optional')}</span></label>${numField('idle', t('hrs'), F.idle)}</div></section>
+  <section class="step">${stepH(5, t('work'), optT())}<div class="field"><input id="work" type="text" value="${esc(F.work ?? '')}" placeholder="${esc(t('workPh'))}"></div></section>
+  <section class="step" id="s_ph">${stepH(6, t('photos'), reqT())}
+    <div class="photos">${photoBox('mp', t('mphoto'), t('needed'))}${photoBox('fp', t('fphoto'), t('ifFuel'))}</div>${emsg('ph')}</section>`;
+  bar(`<button class="btn pri" id="save">${I.send}${t('save')}</button>`);
+  calc();
 }
 
-function gauge() {
-  const m = cur, end = parseFloat($('#end')?.value), fuel = parseFloat($('#fuel')?.value) || 0, g = $('#gauge');
-  if (!g) return;
-  if (isNaN(end) || m.last == null) { g.innerHTML = ''; return }
-  const used = +(end - m.last).toFixed(1), unit = m.meter === 'Hour' ? 'hrs' : 'km';
-  let html = `<div class="gauge ${used < 0 ? 'bad' : 'pend'}"><span>${t('used')}</span><b>${used} ${unit}</b></div>`;
-  if (fuel > 0 && used > 0) {
-    const eff = m.meter === 'Hour' ? fuel / used : used / fuel, u = m.meter === 'Hour' ? 'L/hr' : 'km/L';
-    const badHigh = m.meter === 'Hour' && m.max && eff > m.max, badLow = m.meter === 'Km' && m.min && eff < m.min;
-    html += `<div class="gauge ${badHigh || badLow ? 'bad' : 'ok'}"><span>${badHigh ? t('high') : badLow ? t('low') : t('normal') + ' ' + (m.min ?? '') + '–' + (m.max ?? '') + ' ' + u}</span><b>${eff.toFixed(1)} ${u}</b></div>`;
+function calc() {
+  const m = cur; if (!m || view !== 'log') return;
+  const start = (m.last != null && m.last !== '') ? +m.last : parseFloat($('#start')?.value);
+  const end = parseFloat($('#end')?.value), fuel = parseFloat($('#fuel')?.value) || 0, u = unitOf(m);
+  let h1 = '', h2 = '';
+  if (!isNaN(end) && !isNaN(start)) {
+    const used = +(end - start).toFixed(1);
+    const bad = used < 0 || (m.meter === 'Hour' && used > 24);
+    h1 = `<div class="calc ${bad ? 'c-bad' : 'c-info'}"><span>${t('worked')}</span><b class="num">${fmtN(used)} ${u}</b></div>`;
+    if (fuel > 0 && used > 0) {
+      const eff = m.meter === 'Hour' ? fuel / used : used / fuel, eu = m.meter === 'Hour' ? t('lhr') : t('km') + '/L';
+      const hi = m.meter === 'Hour' && m.max && eff > m.max, lo = m.meter !== 'Hour' && m.min && eff < m.min;
+      h2 = `<div class="calc ${hi || lo ? 'c-bad' : 'c-ok'}"><span>${t('eff')}: ${hi ? t('high') : lo ? t('low') : t('normal')}</span><b class="num">${eff.toFixed(1)} ${eu}</b></div>`;
+    }
   }
-  g.innerHTML = html;
+  $('#calc1').innerHTML = h1; $('#calc2').innerHTML = h2;
+  const fp = $('#box_fp'); if (fp && !F.fp) fp.querySelector('small').textContent = fuel > 0 ? t('needed') : t('ifFuel');
 }
 
-function fuelForm() {
+function vFuel() {
   F.ft = F.ft || 'Diesel';
-  $('#app').innerHTML = `<div class="card"><h2>${t('fuelin')}</h2><label>${t('fueltype')}</label>${seg('ft', [['Diesel', 'Diesel'], ['Petrol', 'Petrol']], F.ft)}
-  <div class="pair"><div><label for="qty">${t('qty')}</label><input id="qty" class="big" type="number" inputmode="decimal"></div><div><label for="rate">${t('rate')}</label><input id="rate" class="big" type="number" inputmode="decimal"></div></div>
-  <label for="supp">${t('supp')}</label><input id="supp" type="text"><label for="bill">${t('bill')}</label><input id="bill" type="text">
-  ${photo('bp', t('bphoto'))}<div id="err" class="err"></div></div>`;
-  showBar(true);
+  header(t('fuelin'), D.project, true);
+  $('#app').innerHTML = `
+  <section class="step">${stepH(1, t('fueltype'))}<div class="seg" data-seg="ft"><button data-v="Diesel" class="${F.ft === 'Diesel' ? 'on' : ''}">Diesel</button><button data-v="Petrol" class="${F.ft === 'Petrol' ? 'on' : ''}">Petrol</button></div></section>
+  <section class="step">${stepH(2, t('qty'), reqT())}${numField('qty', 'L', F.qty)}
+    <label class="lbl" for="rate">${t('rate')} <span class="opt">${t('optional')}</span></label>${numField('rate', 'Rs', F.rate)}<div id="calc3"></div></section>
+  <section class="step">${stepH(3, t('supp'), optT())}<div class="field"><input id="supp" type="text" value="${esc(F.supp ?? '')}"></div>
+    <label class="lbl" for="bill">${t('bill')}</label><div class="field"><input id="bill" type="text" value="${esc(F.bill ?? '')}"></div></section>
+  <section class="step" id="s_ph">${stepH(4, t('bphoto'), reqT())}<div class="photos one">${photoBox('bp', t('bphoto'), t('needed'))}</div>${emsg('ph')}</section>`;
+  bar(`<button class="btn pri" id="save">${I.send}${t('save')}</button>`);
+  fuelCalc();
 }
+function fuelCalc() { const el = $('#calc3'); if (!el) return; const q2 = parseFloat($('#qty')?.value), r = parseFloat($('#rate')?.value); el.innerHTML = q2 > 0 && r > 0 ? `<div class="calc c-info"><span>Total</span><b class="num">Rs ${Math.round(q2 * r).toLocaleString('en-IN')}</b></div>` : '' }
 
-function dipForm() {
+function vDip() {
   F.ft = F.ft || 'Diesel';
-  $('#app').innerHTML = `<div class="card"><h2>${t('dip')}</h2><label>${t('fueltype')}</label>${seg('ft', [['Diesel', 'Diesel'], ['Petrol', 'Petrol']], F.ft)}
-  <div class="read" style="margin-top:12px"><span>${t('book')}</span><b id="bookv">${esc(D.stock[F.ft] ?? '—')} L</b></div>
-  <label for="meas">${t('meas')}</label><input id="meas" class="big" type="number" inputmode="decimal"><div id="dipg"></div>
-  ${photo('dp', t('dphoto'))}<div id="err" class="err"></div></div>`;
-  showBar(true);
+  header(t('dip'), D.project, true);
+  $('#app').innerHTML = `
+  <section class="step">${stepH(1, t('fueltype'))}<div class="seg" data-seg="ft"><button data-v="Diesel" class="${F.ft === 'Diesel' ? 'on' : ''}">Diesel</button><button data-v="Petrol" class="${F.ft === 'Petrol' ? 'on' : ''}">Petrol</button></div>
+    <div class="prev" style="margin-top:12px"><span>${t('book')}</span><b class="num" id="bookv">${esc(fmtN(+(D.stock[F.ft] ?? 0)))} L</b></div></section>
+  <section class="step">${stepH(2, t('meas'), reqT())}${numField('meas', 'L', F.meas)}<div id="dipg"></div></section>
+  <section class="step" id="s_ph">${stepH(3, t('dphoto'), reqT())}<div class="photos one">${photoBox('dp', t('dphoto'), t('needed'))}</div>${emsg('ph')}</section>`;
+  bar(`<button class="btn pri" id="save">${I.send}${t('save')}</button>`);
+  dipCalc();
+}
+function dipCalc() { const el = $('#dipg'); if (!el) return; const v = $('#meas').value; if (v === '') { el.innerHTML = ''; return } const d = (+v) - (+(D.stock[F.ft] ?? 0)); el.innerHTML = `<div class="calc ${Math.abs(d) > 20 ? 'c-bad' : 'c-ok'}"><span>${t('diff')}</span><b class="num">${d > 0 ? '+' : ''}${d.toFixed(1)} L</b></div>` }
+
+function vBd() {
+  header(t('bd'), D.project, true);
+  $('#app').innerHTML = `
+  <section class="step">${stepH(1, t('whichM'))}<div class="field"><select id="bm">${D.machines.map(m => `<option value="${esc(m.id)}" ${F.bm === m.id ? 'selected' : ''}>${esc(m.name)} – ${esc(m.id)}</option>`).join('')}</select></div></section>
+  <section class="step">${stepH(2, t('fault'), reqT())}<div class="field" id="f_fault"><textarea id="fault" placeholder="${esc(t('faultPh'))}">${esc(F.fault ?? '')}</textarea></div>${emsg('fault')}</section>
+  <section class="step">${stepH(3, t('eta'), optT())}<div class="field"><input id="eta" type="date" value="${esc(F.eta ?? '')}"></div></section>
+  <section class="step">${stepH(4, t('bdphoto'), optT())}<div class="photos one">${photoBox('bdp', t('bdphoto'), t('optional'))}</div></section>`;
+  bar(`<button class="btn pri" id="save" style="background:var(--bad)">${I.send}${t('save')}</button>`);
 }
 
-function bdForm() {
-  $('#app').innerHTML = `<div class="card"><h2>${t('bd')}</h2><label for="bm">${t('all')}</label><select id="bm">${D.machines.map(m => `<option value="${esc(m.id)}">${esc(m.name)} (${esc(m.id)})</option>`).join('')}</select>
-  <label for="fault">${t('fault')}</label><textarea id="fault" rows="3"></textarea><label for="eta">${t('eta')}</label><input id="eta" type="date">
-  ${photo('bdp', t('bdphoto'))}<div id="err" class="err"></div></div>`;
-  showBar(true);
+function vDone(queued, lines) {
+  view = 'done';
+  header(queued ? t('queued') : t('saved'), D.project, false);
+  $('#app').innerHTML = `<div class="card done ${queued ? 'q' : ''}"><div class="ok">${queued ? I.warn.replace('<svg', '<svg style="color:var(--warn)"') : I.check.replace('<svg', '<svg style="color:var(--ok)"')}</div>
+   <h2>${queued ? t('queued') : t('saved')}</h2><p class="sub">${queued ? t('queuedS') : t('savedS')}</p>
+   <div class="sum">${(lines || []).map(([k, v]) => `<div><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')}</div></div>`;
+  const more = D.machines.filter(m => !loggedToday(m.id)).length;
+  bar(`<button class="btn sec" data-go="home">${I.home}${t('home')}</button>${last === 'saveLog' && more ? `<button class="btn yel" data-go="pickM">${t('next')}</button>` : ''}`);
 }
 
-function doneView(msg) {
-  $('#app').innerHTML = `<div class="card done"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#1e7d4f"/><path d="M14 25l7 7 13-15" stroke="#fff" stroke-width="4.5" fill="none" stroke-linecap="round"/></svg><h2>${esc(msg)}</h2>
-  <div class="tiles" style="margin-top:16px"><button class="tile" data-go="log">${TILE.log}<span>${t('next')}</span></button><button class="tile" data-go="home"><svg viewBox="0 0 32 32"><path d="M5 15L16 6l11 9v12H5z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M13 27v-7h6v7" stroke="currentColor" stroke-width="2.5" fill="none"/></svg><span>${t('home')}</span></button></div></div>`;
-  $('#bar').classList.add('hide');
-}
+const VIEWS = {home: vHome, user: vUser, pickM: vPick, log: vLog, fuelin: vFuel, dip: vDip, bd: vBd};
+function go(v, keep) { view = v; if (!keep) F = {}; VIEWS[v](); window.scrollTo(0, 0); netLine() }
 
-function pickUser() {
-  $('#app').innerHTML = `<div class="card"><h2>${t('pick')}</h2>${D.staff.map(s => `<button class="m" data-user="${esc(s)}"><div class="nm"><b>${esc(s)}</b></div></button>`).join('')}<label for="oth">Other</label><input id="oth" type="text"><button class="btn pri" style="width:100%;margin-top:12px" id="othok">OK</button></div>`;
-  $('#bar').classList.add('hide');
-}
-
-function showBar(on) { const b = $('#bar'); b.classList.toggle('hide', false); $('#back').textContent = t('back'); $('#save').textContent = t('save'); $('#save').classList.toggle('hide', !on) }
-
-function go(v) { view = v; F = (v === 'logform') ? F : {}; header(); ({home, log: pickMachine, logform: logForm, fuelin: fuelForm, dip: dipForm, bd: bdForm, user: pickUser})[v](); window.scrollTo(0, 0) }
-
-/* ---------- photo: shrink before upload ---------- */
+/* ================= photos ================= */
 function shrink(file) {
   return new Promise((res, rej) => { const img = new Image(), r = new FileReader();
-    r.onload = () => { img.onload = () => { const k = Math.min(1, 1280 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = img.width * k; c.height = img.height * k; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.7)) }; img.onerror = rej; img.src = r.result };
+    r.onload = () => { img.onload = () => { const k = Math.min(1, 1280 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.7)) }; img.onerror = rej; img.src = r.result };
     r.onerror = rej; r.readAsDataURL(file) });
 }
 
-/* ---------- save ---------- */
+/* ================= validation + save ================= */
 let gps = '';
-function grabGps() { try { navigator.geolocation && navigator.geolocation.getCurrentPosition(p => gps = p.coords.latitude.toFixed(5) + ',' + p.coords.longitude.toFixed(5), () => {}, {timeout: 8000}) } catch (e) {} }
-
-async function save() {
-  if (busy) return; const err = m => { $('#err').textContent = m; return null }; const num = id => parseFloat($('#' + id)?.value);
-  let fn, rec;
-  const base = {by: user(), gps, at: new Date().toISOString()};
-  if (view === 'logform') {
-    const end = num('end'), fuel = num('fuel') || 0, m = cur;
-    if (isNaN(end)) return err(t('end') + ' ?');
-    if (m.last != null && end < m.last) return err('End reading is less than start reading');
-    if (m.meter === 'Hour' && m.last != null && end - m.last > 24) return err('More than 24 hours in one day – check reading');
-    if (!F.mp) return err(t('mphoto') + ' ?');
-    if (fuel > 0 && !F.fp) return err(t('fphoto') + ' ?');
-    if (F.cond === 'B' && !(num('bdh') > 0)) return err(t('bdh') + ' ?');
-    const d = new Date(); if (F.day === 'yst') d.setDate(d.getDate() - 1);
-    fn = 'saveLog'; rec = {...base, date: iso(d), id: m.id, start: m.last, end, fuel, idle: num('idle') || '', bdh: num('bdh') || '', cond: ({W: 'Working', I: 'Idle', B: 'Breakdown', N: 'Not at site'})[F.cond], work: $('#work').value.trim(), mp: F.mp, fp: F.fp || ''};
-  } else if (view === 'fuelin') {
-    const qty = num('qty'), rate = num('rate'); if (!(qty > 0)) return err(t('qty') + ' ?'); if (!F.bp) return err(t('bphoto') + ' ?');
-    fn = 'saveFuel'; rec = {...base, date: iso(new Date()), fuel: F.ft, qty, rate: rate || '', supp: $('#supp').value.trim(), bill: $('#bill').value.trim(), bp: F.bp};
-  } else if (view === 'dip') {
-    const meas = num('meas'); if (!(meas >= 0)) return err(t('meas') + ' ?'); if (!F.dp) return err('Photo ?');
-    fn = 'saveDip'; rec = {...base, date: iso(new Date()), fuel: F.ft, meas, dp: F.dp};
-  } else if (view === 'bd') {
-    const fault = $('#fault').value.trim(); if (!fault) return err(t('fault'));
-    fn = 'saveBreakdown'; rec = {...base, date: iso(new Date()), id: $('#bm').value, fault, eta: $('#eta').value, bdp: F.bdp || ''};
-  }
-  busy = true; $('#save').disabled = true; $('#save').textContent = '…';
-  try { await call(fn, rec); if (fn === 'saveLog') { D.logged[rec.date + '|' + rec.id] = 1; if (rec.date === iso(new Date())) cur.last = rec.end } doneView(t('saved')) }
-  catch (e) { const msg = String(e && e.message || e); if (/already/i.test(msg)) err(msg); else { const q = queue(); q.push({fn, rec}); store.set('cl_queue', q); doneView(t('queue')) } }
-  finally { busy = false; $('#save').disabled = false }
+function grabGps() { try { navigator.geolocation && navigator.geolocation.getCurrentPosition(p => gps = p.coords.latitude.toFixed(5) + ',' + p.coords.longitude.toFixed(5), () => {}, {timeout: 8000, maximumAge: 300000}) } catch (e) {} }
+function clearErr() { document.querySelectorAll('.field.bad').forEach(x => x.classList.remove('bad')); document.querySelectorAll('.emsg.show').forEach(x => x.classList.remove('show')); document.querySelectorAll('.step.err,.ph.bad').forEach(x => x.classList.remove('err', 'bad')) }
+function flag(id, msg, boxes) {
+  const f = $('#f_' + id); if (f) f.classList.add('bad');
+  const e = $('#e_' + id); if (e) { e.querySelector('span').textContent = msg; e.classList.add('show') }
+  (boxes || []).forEach(b => $('#box_' + b)?.classList.add('bad'));
+  const s = (f || e)?.closest('.step'); if (s) s.classList.add('err');
+  return s;
 }
 
-async function flush() { const q = queue(); if (!q.length) return; const left = []; for (const it of q) { try { await call(it.fn, it.rec) } catch (e) { if (!/already/i.test(String(e))) left.push(it) } } store.set('cl_queue', left); if (view === 'home') home() }
+async function save() {
+  if (busy) return; clearErr();
+  const num = id => { const el = $('#' + id); return el && el.value !== '' ? parseFloat(el.value) : NaN };
+  const errs = []; let fn, rec, lines;
+  const base = {by: user(), gps, at: new Date().toISOString()};
+  if (view === 'log') {
+    const m = cur, hasLast = m.last != null && m.last !== '', start = hasLast ? +m.last : num('start'), end = num('end'), fuel = num('fuel') || 0;
+    if (!hasLast && isNaN(start)) errs.push(flag('start', t('req')));
+    if (isNaN(end)) errs.push(flag('end', t('req')));
+    else if (!isNaN(start) && end < start) errs.push(flag('end', t('endLess') + ' (' + fmtN(start) + ')'));
+    else if (m.meter === 'Hour' && !isNaN(start) && end - start > 24) errs.push(flag('end', t('tooMany')));
+    if (F.cond === 'B' && !(num('bdh') > 0)) errs.push(flag('bdh', t('req')));
+    const miss = []; if (!F.mp) miss.push('mp'); if (fuel > 0 && !F.fp) miss.push('fp');
+    if (miss.length) errs.push(flag('ph', t('photoReq') + ': ' + miss.map(x => t(x === 'mp' ? 'mphoto' : 'fphoto')).join(', '), miss));
+    if (!errs.length) {
+      const d = new Date(); if (F.day === 'yst') d.setDate(d.getDate() - 1);
+      fn = 'saveLog'; rec = {...base, date: iso(d), id: m.id, start, end, fuel, idle: num('idle') || '', bdh: num('bdh') || '', cond: ({W: 'Working', I: 'Idle', B: 'Breakdown', N: 'Not at site'})[F.cond], work: $('#work').value.trim(), mp: F.mp, fp: F.fp || ''};
+      lines = [[t('whichM'), m.name], [t('reading'), fmtN(start) + ' → ' + fmtN(end) + ' ' + unitOf(m)], [t('worked'), fmtN(end - start) + ' ' + unitOf(m)], [t('fuel'), fuel + ' L'], [t('cond'), t(F.cond)]];
+    }
+  } else if (view === 'fuelin') {
+    const qty = num('qty'), rate = num('rate');
+    if (!(qty > 0)) errs.push(flag('qty', t('req')));
+    if (!F.bp) errs.push(flag('ph', t('photoReq'), ['bp']));
+    if (!errs.length) { fn = 'saveFuel'; rec = {...base, date: iso(new Date()), fuel: F.ft, qty, rate: isNaN(rate) ? '' : rate, supp: $('#supp').value.trim(), bill: $('#bill').value.trim(), bp: F.bp}; lines = [[t('fueltype'), F.ft], [t('qty'), qty + ' L']].concat(rate > 0 ? [[t('rate'), 'Rs ' + rate]] : []) }
+  } else if (view === 'dip') {
+    const meas = num('meas');
+    if (!(meas >= 0)) errs.push(flag('meas', t('req')));
+    if (!F.dp) errs.push(flag('ph', t('photoReq'), ['dp']));
+    if (!errs.length) { fn = 'saveDip'; rec = {...base, date: iso(new Date()), fuel: F.ft, meas, dp: F.dp}; lines = [[t('fueltype'), F.ft], [t('meas'), meas + ' L'], [t('diff'), ((meas - (+(D.stock[F.ft] ?? 0)))).toFixed(1) + ' L']] }
+  } else if (view === 'bd') {
+    const fault = $('#fault').value.trim();
+    if (!fault) errs.push(flag('fault', t('req')));
+    if (!errs.length) { const m = D.machines.find(x => x.id === $('#bm').value); fn = 'saveBreakdown'; rec = {...base, date: iso(new Date()), id: $('#bm').value, fault, eta: $('#eta').value, bdp: F.bdp || ''}; lines = [[t('whichM'), m ? m.name : rec.id], [t('fault'), fault]] }
+  }
+  if (errs.length) { toast(t('fix')); const s = errs.find(Boolean); if (s) s.scrollIntoView({behavior: 'smooth', block: 'start'}); return }
+  busy = true; const b = $('#save'); b.disabled = true; b.innerHTML = `<span class="spin"></span>${t('saving')}`;
+  last = fn;
+  try {
+    await call(fn, rec);
+    if (fn === 'saveLog') { D.logged[rec.date + '|' + rec.id] = 1; if (rec.date === iso(new Date())) cur.last = rec.end }
+    if (fn === 'saveFuel') D.stock[rec.fuel] = (+(D.stock[rec.fuel] ?? 0)) + rec.qty;
+    vDone(false, lines);
+  } catch (e) {
+    const msg = String(e && e.message || e);
+    if (/already|unknown|less than/i.test(msg)) { toast(msg); b.disabled = false; b.innerHTML = `${I.send}${t('save')}` }
+    else { const qq = queue(); qq.push({fn, rec}); store.set('cl_queue', qq); if (fn === 'saveLog') D.logged[rec.date + '|' + rec.id] = 1; vDone(true, lines) }
+  } finally { busy = false }
+}
 
-/* ---------- events ---------- */
+async function flush(manual) {
+  const qq = queue(); if (!qq.length) return; const left = [];
+  for (const it of qq) { try { await call(it.fn, it.rec) } catch (e) { if (!/already/i.test(String(e))) left.push(it) } }
+  store.set('cl_queue', left);
+  if (manual) toast(left.length ? left.length + ' ' + t('waiting') : '✓ ' + t('saved'));
+  if (view === 'home') vHome();
+}
+
+/* ================= events ================= */
 document.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.lang) { L = b.dataset.lang; store.set('cl_lang', L); return view === 'done' ? go('home') : go(view, true) }
   if (b.dataset.go) return go(b.dataset.go);
-  if (b.dataset.m) { cur = D.machines.find(m => m.id === b.dataset.m); F = {}; grabGps(); return go('logform') }
+  if (b.dataset.m) { cur = D.machines.find(m => m.id === b.dataset.m); F = {}; grabGps(); view = 'log'; vLog(); window.scrollTo(0, 0); return }
   if (b.dataset.user) { store.set('cl_user', b.dataset.user); return go('home') }
-  if (b.id === 'othok') { const v = $('#oth').value.trim(); if (v) { store.set('cl_user', v); go('home') } return }
-  const s = b.closest('[data-seg]'); if (s) { F[s.dataset.seg] = b.dataset.v; s.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); if (s.dataset.seg === 'ft' && view === 'dip') $('#bookv').textContent = (D.stock[F.ft] ?? '—') + ' L'; return }
+  if (b.id === 'othok') { const v = $('#oth').value.trim(); if (v) { store.set('cl_user', v); return go('home') } if (user()) return go('home'); return toast(t('pick')) }
+  if (b.dataset.f) { filter = b.dataset.f; b.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); return drawPick() }
+  const s = b.closest('[data-seg]');
+  if (s) {
+    F[s.dataset.seg] = b.dataset.v; s.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    if (s.dataset.seg === 'cond') { $('#bdhWrap').classList.toggle('hide', F.cond !== 'B'); $('#idleWrap').classList.toggle('hide', !(cur.meter === 'Hour' && F.cond !== 'N')) }
+    if (s.dataset.seg === 'ft' && view === 'dip') { $('#bookv').textContent = fmtN(+(D.stock[F.ft] ?? 0)) + ' L'; dipCalc() }
+    return;
+  }
   if (b.id === 'save') return save();
-  if (b.id === 'back') return go(view === 'logform' ? 'log' : 'home');
-  if (b.id === 'lang') { L = L === 'en' ? 'ne' : 'en'; store.set('cl_lang', L); return go(view === 'logform' ? 'logform' : view) }
+  if (b.id === 'back') { if (view === 'log') return go('pickM'); if (view === 'user' && !user()) return; return go('home') }
   if (b.id === 'who') return go('user');
+  if (b.id === 'flush') return flush(true);
 });
 document.addEventListener('input', e => {
-  if (e.target.id === 'end' || e.target.id === 'fuel') { F[e.target.id] = e.target.value; gauge() }
-  if (['idle', 'bdh', 'work'].includes(e.target.id)) F[e.target.id] = e.target.value;
-  if (e.target.id === 'meas') { const d = (+e.target.value) - (D.stock[F.ft] || 0); $('#dipg').innerHTML = e.target.value === '' ? '' : `<div class="gauge ${Math.abs(d) > 20 ? 'bad' : 'ok'}"><span>${t('diff')}</span><b>${d.toFixed(1)} L</b></div>` }
+  const id = e.target.id;
+  if (['start', 'end', 'fuel', 'idle', 'bdh', 'work', 'qty', 'rate', 'supp', 'bill', 'meas', 'fault', 'eta'].includes(id)) F[id] = e.target.value;
+  if (id === 'q') { q = e.target.value; return drawPick() }
+  const f = e.target.closest('.field.bad'); if (f) { f.classList.remove('bad'); $('#e_' + id)?.classList.remove('show'); const s = f.closest('.step'); if (s && !s.querySelector('.field.bad')) s.classList.remove('err') }
+  if (view === 'log') calc(); if (view === 'fuelin') fuelCalc(); if (view === 'dip' && id === 'meas') dipCalc();
 });
 document.addEventListener('change', async e => {
+  if (e.target.id === 'bm') F.bm = e.target.value;
   const n = e.target.dataset.ph; if (!n || !e.target.files[0]) return;
-  try { F[n] = await shrink(e.target.files[0]); const im = $('#im_' + n); im.src = F[n]; im.classList.remove('hide') } catch (er) { $('#err').textContent = 'Photo could not be read' }
+  const box = $('#box_' + n);
+  try {
+    F[n] = await shrink(e.target.files[0]);
+    box.classList.remove('bad'); box.classList.add('has');
+    box.innerHTML = `<img src="${F[n]}" alt=""><span class="tick">${I.check}</span><span class="retake">${t('retake')}</span><input type="file" accept="image/*" capture="environment" data-ph="${n}">`;
+    const em = $('#e_ph'); if (em && !document.querySelector('.ph.bad')) { em.classList.remove('show'); em.closest('.step')?.classList.remove('err') }
+  } catch (er) { toast('Photo could not be read – try again') }
 });
-window.addEventListener('online', flush);
+window.addEventListener('online', () => { netLine(); flush() });
+window.addEventListener('offline', netLine);
 
-/* ---------- start ---------- */
-header(); $('#app').innerHTML = '<p class="note">Loading…</p>';
-call('init').then(d => { D = d; header(); flush(); go(user() ? 'home' : 'user') }).catch(e => { $('#app').innerHTML = `<div class="q">Could not load: ${esc(e && e.message || e)}</div>` });
+/* ================= start ================= */
+function start() {
+  header('Contech Site Log', '', false); bar('');
+  $('#app').innerHTML = `<div class="load"><span class="spin"></span>${L === 'ne' ? 'खुल्दैछ…' : 'Opening…'}</div>`;
+  call('init').then(d => { D = d; flush(); go(user() ? 'home' : 'user') })
+    .catch(e => { $('#app').innerHTML = `<div class="card done q"><div class="ok">${I.warn.replace('<svg', '<svg style="color:var(--warn)"')}</div><h2>${t('loadErr')}</h2><p class="sub">${esc(e && e.message || e)}</p></div>`; bar(`<button class="btn pri" id="retry">${t('retry')}</button>`); $('#retry').onclick = start });
+}
+start(); netLine();
 }
 </script>
 </body>
