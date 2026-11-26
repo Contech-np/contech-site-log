@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contech Site Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: plain, sure, outdoor-readable, like a machine logbook card
+   IDEA: the yellow equipment logbook a timekeeper carries on site
+   PICTURE: the machine card with its big meter reading and the live fuel gauge
+   COLOUR and TYPE: earthmover yellow, charcoal ink, one red for problems; Barlow / Barlow Condensed numbers
+   LAYOUT: one column, thumb-sized buttons, sticky save bar at the bottom */
+:root{color-scheme:light dark;--bg:light-dark(#f4f2ec,#141414);--card:light-dark(#fff,#1f1f1f);--ink:light-dark(#1c1c1c,#f2f2f2);--mute:light-dark(#6b6b6b,#a5a5a5);--line:light-dark(#e2ded3,#333);--yel:#f2b705;--yel2:light-dark(#fff4cc,#3a3010);--red:#c0392b;--red2:light-dark(#fde2de,#3b1714);--grn:#1e7d4f;--grn2:light-dark(#dcefe2,#123020)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Barlow,system-ui,sans-serif;overflow-x:clip;padding-bottom:96px}
+button,input,select,textarea{font:inherit;color:inherit}
+.top{background:var(--yel);color:#1c1c1c;padding:14px 16px 12px;position:sticky;top:0;z-index:5}
+.top .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.top h1{font:700 22px/1.1 'Barlow Condensed',sans-serif;margin:0}
+.top small{display:block;font-size:13px;opacity:.8}
+.chip{border:1.5px solid #1c1c1c;border-radius:20px;padding:4px 10px;font-size:13px;background:transparent;font-weight:600;cursor:pointer}
+.wrap{max-width:560px;margin:0 auto;padding:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.prog{display:flex;align-items:center;gap:14px}
+.ring{width:64px;height:64px;flex:none}
+.prog b{font:700 28px 'Barlow Condensed',sans-serif}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 12px;text-align:left;min-height:88px;cursor:pointer;display:flex;flex-direction:column;gap:6px}
+.tile svg{width:30px;height:30px}
+.tile span{font-weight:700}
+.tile:first-child{background:#1c1c1c;color:#fff;border-color:#1c1c1c}
+h2{font:700 20px 'Barlow Condensed',sans-serif;margin:6px 0 10px}
+.m{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer;background:none;border-left:0;border-right:0;border-bottom:0;width:100%;text-align:left}
+.m:first-of-type{border-top:0}
+.m .ic{width:40px;height:40px;border-radius:10px;background:var(--yel2);display:grid;place-items:center;flex:none}
+.m .ic svg{width:26px;height:26px}
+.m .nm{flex:1}.m .nm small{display:block;color:var(--mute);font-size:13px}
+.tag{font-size:12px;font-weight:700;border-radius:8px;padding:3px 8px;white-space:nowrap}
+.ok{background:var(--grn2);color:var(--grn)}.pend{background:var(--yel2);color:light-dark(#8a6400,#f2b705)}.bad{background:var(--red2);color:var(--red)}
+label{display:block;font-weight:600;margin:12px 0 6px}
+label small{font-weight:500;color:var(--mute)}
+input[type=number],input[type=text],input[type=date],select,textarea{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card);font-size:17px}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid var(--yel);outline-offset:1px}
+.big{font:700 30px 'Barlow Condensed',sans-serif!important;letter-spacing:.5px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{min-height:44px;padding:8px 14px;border-radius:22px;border:1.5px solid var(--line);background:var(--card);font-weight:600;cursor:pointer}
+.seg button.on{background:#1c1c1c;color:#fff;border-color:#1c1c1c}
+.read{display:flex;justify-content:space-between;align-items:baseline;background:var(--yel2);border-radius:10px;padding:10px 12px}
+.read b{font:700 26px 'Barlow Condensed',sans-serif}
+.gauge{border-radius:12px;padding:12px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.gauge b{font:700 30px 'Barlow Condensed',sans-serif;white-space:nowrap}
+.photo{border:2px dashed var(--line);border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer;min-height:64px}
+.photo img{width:64px;height:64px;object-fit:cover;border-radius:8px}
+.photo input{display:none}
+.err{color:var(--red);font-weight:600;font-size:14px;margin-top:8px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+.bar .in{max-width:560px;margin:0 auto;display:flex;gap:10px}
+.btn{flex:1;min-height:54px;border-radius:12px;border:0;font:700 19px Barlow,sans-serif;cursor:pointer}
+.btn.pri{background:#1c1c1c;color:#fff}.btn.sec{background:var(--card);border:1.5px solid var(--line);flex:0 0 96px}
+.btn:disabled{opacity:.5}
+.done{text-align:center;padding:30px 10px}
+.done svg{width:84px;height:84px}
+.note{font-size:13px;color:var(--mute)}
+.q{background:var(--red2);color:var(--red);font-weight:700;border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:14px}
+.hide{display:none!important}
+@media(prefers-reduced-motion:no-preference){.done svg{animation:pop .4s ease-out}@keyframes pop{from{transform:scale(.6);opacity:0}}}
+</style>
+</head>
+<body>
+<header class="top"><div class="row"><div><h1 id="pname">Siraha Pkg 10</h1><small id="today"></small></div><div class="row"><button class="chip" id="lang">नेपाली</button><button class="chip" id="who">—</button></div></div></header>
+<main class="wrap" id="app"></main>
+<div class="bar hide" id="bar"><div class="in"><button class="btn sec" id="back"></button><button class="btn pri" id="save"></button></div></div>
+<script>
+{
+const IS_GAS = typeof google !== 'undefined' && google.script && google.script.run;
+// Office link that writes into the Google Sheet. Leave empty for the practice version.
+const API = /[?&]demo/.test(location.search) ? '' : 'https://script.google.com/macros/s/AKfycbxk3hJSOQjAr8H01YvuBF09z85zB_teazPPPc7xSMhusEOX0kFv2nauJuVBnJnHRyBO6A/exec';
+const LIVE = !!(IS_GAS || API);
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch (e) { return d } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)) } catch (e) {} } };
+
+/* ---------- words (English / Nepali) ---------- */
+const W = {
+ en:{log:'Machine / vehicle log',fuelin:'Fuel received',dip:'Tank check',bd:'Breakdown report',logged:'logged today',pending:'Pending',done:'Logged',all:'All machines and vehicles',start:'Start reading (yesterday’s end)',end:'End reading now',used:'Used',fuel:'Fuel issued (litres)',cond:'Condition',work:'Work / chainage / trip purpose',idle:'Idle hours',bdh:'Breakdown hours',mphoto:'Photo of meter / odometer',fphoto:'Photo of fuel slip',tap:'Tap to take photo',save:'Save',back:'Back',saved:'Saved and sent to office',next:'Log next machine',home:'Home',W:'Working',I:'Idle',B:'Breakdown',N:'Not at site',normal:'normal',high:'above normal – office will ask',low:'below normal – office will ask',fueltype:'Fuel',qty:'Litres received',rate:'Rate (NPR per litre)',supp:'Supplier',bill:'Bill / challan no.',bphoto:'Photo of bill',meas:'Litres measured in tank',book:'Book stock',diff:'Difference',fault:'What is the problem?',eta:'Expected repair date',bdphoto:'Photo of the problem',dphoto:'Photo of tank / dip stick',day:'Log for',tdy:'Today',yst:'Yesterday',pick:'Who is entering?',queue:'waiting to send – will send when internet returns',sample:'Practice version: sample machines, nothing is sent'},
+ ne:{log:'मेसिन / गाडी लग',fuelin:'इन्धन प्राप्त',dip:'ट्यांकी जाँच',bd:'बिग्रिएको रिपोर्ट',logged:'आज लग भयो',pending:'बाँकी',done:'लग भयो',all:'सबै मेसिन र गाडी',start:'सुरु रिडिङ (हिजोको अन्तिम)',end:'अहिलेको अन्तिम रिडिङ',used:'प्रयोग',fuel:'दिएको इन्धन (लिटर)',cond:'अवस्था',work:'काम / चेनेज / यात्राको कारण',idle:'खाली बसेको घण्टा',bdh:'बिग्रिएको घण्टा',mphoto:'मिटर / ओडोमिटरको फोटो',fphoto:'इन्धन पर्चीको फोटो',tap:'फोटो खिच्न थिच्नुहोस्',save:'सेभ गर्नुहोस्',back:'पछाडि',saved:'सेभ भयो र अफिसमा पठाइयो',next:'अर्को मेसिन लग गर्नुहोस्',home:'गृह',W:'काम गर्दै',I:'खाली',B:'बिग्रिएको',N:'साइटमा छैन',normal:'सामान्य',high:'सामान्यभन्दा बढी – अफिसले सोध्नेछ',low:'सामान्यभन्दा कम – अफिसले सोध्नेछ',fueltype:'इन्धन',qty:'प्राप्त लिटर',rate:'दर (प्रति लिटर रु.)',supp:'सप्लायर',bill:'बिल / चलान नं.',bphoto:'बिलको फोटो',meas:'ट्यांकीमा नापेको लिटर',book:'हिसाबको मौज्दात',diff:'फरक',fault:'के समस्या छ?',eta:'मर्मत हुने मिति',bdphoto:'समस्याको फोटो',dphoto:'ट्यांकी / डिप स्टिकको फोटो',day:'लगको मिति',tdy:'आज',yst:'हिजो',pick:'कसले भर्दै हुनुहुन्छ?',queue:'पठाउन बाँकी – इन्टरनेट आएपछि जानेछ',sample:'अभ्यास संस्करण: नमूना मेसिन, केही पठाइँदैन'}
+};
+let L = store.get('cl_lang', 'en');
+const t = k => W[L][k] || W.en[k] || k;
+
+/* ---------- dates: AD and BS ---------- */
+const BS = {2083:['2026-04-14','2026-05-15','2026-06-15','2026-07-17','2026-08-17','2026-09-17','2026-10-18','2026-11-17','2026-12-16','2027-01-15','2027-02-13','2027-03-15'],2084:['2027-04-14','2027-05-15','2027-06-15','2027-07-17','2027-08-17','2027-09-17','2027-10-17','2027-11-16','2027-12-16','2028-01-14','2028-02-13','2028-03-14']};
+const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+function toBS(d) { const s = iso(d); let out = ''; for (const y in BS) BS[y].forEach((m, i) => { if (m <= s) { const days = Math.round((new Date(s) - new Date(m)) / 864e5) + 1; out = y + '-' + String(i + 1).padStart(2, '0') + '-' + String(days).padStart(2, '0') } }); return out }
+const fmt = d => d.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
+
+/* ---------- practice data (used only outside Google) ---------- */
+const MOCK = (() => {
+  const mk = (id, name, cat, meter, fuel, min, max, last) => ({id, name, cat, meter, fuel, min, max, last});
+  const data = {project: 'Siraha Pkg 10 (Sample)', staff: ['Store keeper', 'Timekeeper', 'Site in-charge'], stock: {Diesel: 438, Petrol: 16.5},
+    machines: [mk('SMP-EXC-01','Excavator 20 t','Heavy machine','Hour','Diesel',12,17,4236), mk('SMP-LDR-01','Wheel loader','Heavy machine','Hour','Diesel',9,14,1057), mk('SMP-GRD-01','Motor grader','Heavy machine','Hour','Diesel',10,15,6133), mk('SMP-ROL-01','Vibratory roller 10 t','Heavy machine','Hour','Diesel',6,10,2311), mk('SMP-TIP-01','Tipper 10-wheel','Tipper','Km','Diesel',2.5,4,58508), mk('SMP-WTR-01','Water bowser','Tanker','Km','Diesel',3,4.5,31506), mk('SMP-PKP-01','Pickup (site)','Light vehicle','Km','Diesel',9,13,84763), mk('SMP-MCY-01','Motorbike (survey)','Motorbike','Km','Petrol',35,50,22455)],
+    logged: {}};
+  return {init: () => data, saveLog: r => { data.logged[r.date + '|' + r.id] = 1; const m = data.machines.find(x => x.id === r.id); if (r.date === iso(new Date())) m.last = +r.end; data.stock[m.fuel] -= +r.fuel || 0; return {ok: true} },
+    saveFuel: r => { data.stock[r.fuel] += +r.qty; return {ok: true} }, saveDip: () => ({ok: true}), saveBreakdown: () => ({ok: true})};
+})();
+const call = (fn, arg) => new Promise((res, rej) => {
+  if (IS_GAS) google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](arg);
+  else if (API) fetch(API, {method: 'POST', body: JSON.stringify({fn, arg}), redirect: 'follow'})
+    .then(r => r.json()).then(j => j.ok ? res(j.data) : rej(new Error(j.error))).catch(rej);
+  else setTimeout(() => { try { res(MOCK[fn](arg)) } catch (e) { rej(e) } }, 350);
+});
+
+/* ---------- icons ---------- */
+const ICON = {
+  'Heavy machine': '<svg viewBox="0 0 32 32"><rect x="3" y="20" width="16" height="6" rx="3" fill="#1c1c1c"/><rect x="6" y="13" width="10" height="7" fill="#f2b705" stroke="#1c1c1c"/><path d="M16 15 L24 7 L29 12" stroke="#1c1c1c" stroke-width="2.5" fill="none"/><path d="M27 12 l3 5 h-6z" fill="#1c1c1c"/></svg>',
+  Tipper: '<svg viewBox="0 0 32 32"><path d="M3 10h16v10H3z" fill="#f2b705" stroke="#1c1c1c"/><path d="M19 13h6l4 4v3H19z" fill="#1c1c1c"/><circle cx="8" cy="23" r="3" fill="#1c1c1c"/><circle cx="24" cy="23" r="3" fill="#1c1c1c"/></svg>',
+  Tanker: '<svg viewBox="0 0 32 32"><rect x="3" y="11" width="17" height="9" rx="4.5" fill="#f2b705" stroke="#1c1c1c"/><path d="M20 13h5l4 4v3h-9z" fill="#1c1c1c"/><circle cx="8" cy="23" r="3" fill="#1c1c1c"/><circle cx="24" cy="23" r="3" fill="#1c1c1c"/></svg>',
+  'Light vehicle': '<svg viewBox="0 0 32 32"><path d="M4 19l3-7h12l5 4h4v5H4z" fill="#f2b705" stroke="#1c1c1c"/><circle cx="9" cy="22" r="3" fill="#1c1c1c"/><circle cx="23" cy="22" r="3" fill="#1c1c1c"/></svg>',
+  Motorbike: '<svg viewBox="0 0 32 32"><circle cx="8" cy="21" r="5" fill="none" stroke="#1c1c1c" stroke-width="2.5"/><circle cx="24" cy="21" r="5" fill="none" stroke="#1c1c1c" stroke-width="2.5"/><path d="M8 21l6-8h6l4 8M16 13l-2-4h-3" stroke="#1c1c1c" stroke-width="2.5" fill="none"/></svg>'
+};
+const icon = c => ICON[c] || ICON['Heavy machine'];
+const TILE = {
+  log: '<svg viewBox="0 0 32 32"><rect x="6" y="4" width="20" height="24" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M11 11h10M11 16h10M11 21h6" stroke="currentColor" stroke-width="2.5"/></svg>',
+  fuelin: '<svg viewBox="0 0 32 32"><path d="M8 28V6h11v22M8 15h11" stroke="currentColor" stroke-width="2.5" fill="none"/><path d="M19 10l5 4v10a2 2 0 0 0 4 0V12" stroke="currentColor" stroke-width="2.5" fill="none"/></svg>',
+  dip: '<svg viewBox="0 0 32 32"><rect x="5" y="9" width="22" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M5 19h22" stroke="#f2b705" stroke-width="3"/><path d="M16 3v14" stroke="currentColor" stroke-width="2.5"/></svg>',
+  bd: '<svg viewBox="0 0 32 32"><path d="M16 4l13 23H3z" fill="none" stroke="#c0392b" stroke-width="2.5"/><path d="M16 12v7M16 22v2" stroke="#c0392b" stroke-width="3"/></svg>'
+};
+
+/* ---------- state ---------- */
+let D = null, view = 'home', cur = null, F = {}, busy = false;
+const queue = () => store.get('cl_queue', []);
+const user = () => store.get('cl_user', '');
+
+function header() {
+  const d = new Date();
+  $('#pname').textContent = D ? D.project : 'Site log';
+  $('#today').textContent = fmt(d) + ' · ' + toBS(d) + ' BS';
+  $('#lang').textContent = L === 'en' ? 'नेपाली' : 'English';
+  $('#who').textContent = user() || t('pick');
+}
+const loggedToday = id => D.logged[iso(new Date()) + '|' + id];
+
+/* ---------- views ---------- */
+function home() {
+  const ms = D.machines, n = ms.filter(m => loggedToday(m.id)).length, pct = ms.length ? n / ms.length : 0;
+  const q = queue().length;
+  $('#app').innerHTML = (LIVE ? '' : `<p class="note">${t('sample')}</p>`) + (q ? `<div class="q">${q} ${t('queue')}</div>` : '') + `
+  <div class="card prog"><svg class="ring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--line)" stroke-width="5"/><circle cx="18" cy="18" r="15" fill="none" stroke="#f2b705" stroke-width="5" stroke-dasharray="${(pct * 94.2).toFixed(1)} 94.2" transform="rotate(-90 18 18)" stroke-linecap="round"/></svg>
+  <div><b>${n} / ${ms.length}</b><div>${t('logged')}</div></div></div>
+  <div class="tiles">${['log', 'fuelin', 'dip', 'bd'].map(k => `<button class="tile" data-go="${k}">${TILE[k]}<span>${t(k)}</span></button>`).join('')}</div>
+  <div class="card"><h2>${t('all')}</h2>${ms.map(m => `<button class="m" data-m="${esc(m.id)}"><div class="ic">${icon(m.cat)}</div><div class="nm">${esc(m.name)}<small>${esc(m.id)} · ${esc(m.meter === 'Hour' ? 'hrs' : 'km')} ${esc(m.last ?? '—')}</small></div><span class="tag ${loggedToday(m.id) ? 'ok' : 'pend'}">${loggedToday(m.id) ? t('done') : t('pending')}</span></button>`).join('')}</div>`;
+  $('#bar').classList.add('hide');
+}
+
+function seg(name, opts, val) { return `<div class="seg" data-seg="${name}">${opts.map(([v, lbl]) => `<button type="button" data-v="${esc(v)}" class="${v === val ? 'on' : ''}">${esc(lbl)}</button>`).join('')}</div>` }
+function photo(name, lbl) { return `<label>${lbl}</label><label class="photo" for="ph_${name}"><img id="im_${name}" class="${F[name] ? '' : 'hide'}" src="${F[name] || ''}" alt=""><span>${t('tap')}</span><input type="file" accept="image/*" capture="environment" id="ph_${name}" data-ph="${name}"></label>` }
+
+function pickMachine() {
+  $('#app').innerHTML = `<div class="card"><h2>${t('log')}</h2>${D.machines.map(m => `<button class="m" data-m="${esc(m.id)}"><div class="ic">${icon(m.cat)}</div><div class="nm">${esc(m.name)}<small>${esc(m.id)}</small></div><span class="tag ${loggedToday(m.id) ? 'ok' : 'pend'}">${loggedToday(m.id) ? t('done') : t('pending')}</span></button>`).join('')}</div>`;
+  showBar(false);
+}
+
+function logForm() {
+  const m = cur, unit = m.meter === 'Hour' ? 'hrs' : 'km';
+  F.day = F.day || 'tdy'; F.cond = F.cond || 'W';
+  $('#app').innerHTML = `<div class="card"><div class="m" style="border:0;padding:0"><div class="ic">${icon(m.cat)}</div><div class="nm"><b>${esc(m.name)}</b><small>${esc(m.id)} · ${esc(m.fuel)}</small></div></div></div>
+  <div class="card"><label>${t('day')}</label>${seg('day', [['tdy', t('tdy')], ['yst', t('yst')]], F.day)}
+  <label>${t('start')}</label><div class="read"><span>${unit}</span><b>${esc(m.last ?? '—')}</b></div>
+  <label for="end">${t('end')} <small>(${unit})</small></label><input id="end" class="big" type="number" inputmode="decimal" value="${esc(F.end ?? '')}">
+  <label for="fuel">${t('fuel')}</label><input id="fuel" class="big" type="number" inputmode="decimal" value="${esc(F.fuel ?? '')}">
+  <div id="gauge"></div>
+  <label>${t('cond')}</label>${seg('cond', [['W', t('W')], ['I', t('I')], ['B', t('B')], ['N', t('N')]], F.cond)}
+  <div class="pair ${m.meter === 'Hour' ? '' : 'hide'}"><div><label for="idle">${t('idle')}</label><input id="idle" type="number" inputmode="decimal" value="${esc(F.idle ?? '')}"></div><div><label for="bdh">${t('bdh')}</label><input id="bdh" type="number" inputmode="decimal" value="${esc(F.bdh ?? '')}"></div></div>
+  <label for="work">${t('work')}</label><input id="work" type="text" value="${esc(F.work ?? '')}" placeholder="e.g. Excavation 2+450–2+600">
+  ${photo('mp', t('mphoto'))}${photo('fp', t('fphoto') + ' <small>(if fuel given)</small>')}
+  <div id="err" class="err"></div></div>`;
+  showBar(true); gauge();
+}
+
+function gauge() {
+  const m = cur, end = parseFloat($('#end')?.value), fuel = parseFloat($('#fuel')?.value) || 0, g = $('#gauge');
+  if (!g) return;
+  if (isNaN(end) || m.last == null) { g.innerHTML = ''; return }
+  const used = +(end - m.last).toFixed(1), unit = m.meter === 'Hour' ? 'hrs' : 'km';
+  let html = `<div class="gauge ${used < 0 ? 'bad' : 'pend'}"><span>${t('used')}</span><b>${used} ${unit}</b></div>`;
+  if (fuel > 0 && used > 0) {
+    const eff = m.meter === 'Hour' ? fuel / used : used / fuel, u = m.meter === 'Hour' ? 'L/hr' : 'km/L';
+    const badHigh = m.meter === 'Hour' && m.max && eff > m.max, badLow = m.meter === 'Km' && m.min && eff < m.min;
+    html += `<div class="gauge ${badHigh || badLow ? 'bad' : 'ok'}"><span>${badHigh ? t('high') : badLow ? t('low') : t('normal') + ' ' + (m.min ?? '') + '–' + (m.max ?? '') + ' ' + u}</span><b>${eff.toFixed(1)} ${u}</b></div>`;
+  }
+  g.innerHTML = html;
+}
+
+function fuelForm() {
+  F.ft = F.ft || 'Diesel';
+  $('#app').innerHTML = `<div class="card"><h2>${t('fuelin')}</h2><label>${t('fueltype')}</label>${seg('ft', [['Diesel', 'Diesel'], ['Petrol', 'Petrol']], F.ft)}
+  <div class="pair"><div><label for="qty">${t('qty')}</label><input id="qty" class="big" type="number" inputmode="decimal"></div><div><label for="rate">${t('rate')}</label><input id="rate" class="big" type="number" inputmode="decimal"></div></div>
+  <label for="supp">${t('supp')}</label><input id="supp" type="text"><label for="bill">${t('bill')}</label><input id="bill" type="text">
+  ${photo('bp', t('bphoto'))}<div id="err" class="err"></div></div>`;
+  showBar(true);
+}
+
+function dipForm() {
+  F.ft = F.ft || 'Diesel';
+  $('#app').innerHTML = `<div class="card"><h2>${t('dip')}</h2><label>${t('fueltype')}</label>${seg('ft', [['Diesel', 'Diesel'], ['Petrol', 'Petrol']], F.ft)}
+  <div class="read" style="margin-top:12px"><span>${t('book')}</span><b id="bookv">${esc(D.stock[F.ft] ?? '—')} L</b></div>
+  <label for="meas">${t('meas')}</label><input id="meas" class="big" type="number" inputmode="decimal"><div id="dipg"></div>
+  ${photo('dp', t('dphoto'))}<div id="err" class="err"></div></div>`;
+  showBar(true);
+}
+
+function bdForm() {
+  $('#app').innerHTML = `<div class="card"><h2>${t('bd')}</h2><label for="bm">${t('all')}</label><select id="bm">${D.machines.map(m => `<option value="${esc(m.id)}">${esc(m.name)} (${esc(m.id)})</option>`).join('')}</select>
+  <label for="fault">${t('fault')}</label><textarea id="fault" rows="3"></textarea><label for="eta">${t('eta')}</label><input id="eta" type="date">
+  ${photo('bdp', t('bdphoto'))}<div id="err" class="err"></div></div>`;
+  showBar(true);
+}
+
+function doneView(msg) {
+  $('#app').innerHTML = `<div class="card done"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#1e7d4f"/><path d="M14 25l7 7 13-15" stroke="#fff" stroke-width="4.5" fill="none" stroke-linecap="round"/></svg><h2>${esc(msg)}</h2>
+  <div class="tiles" style="margin-top:16px"><button class="tile" data-go="log">${TILE.log}<span>${t('next')}</span></button><button class="tile" data-go="home"><svg viewBox="0 0 32 32"><path d="M5 15L16 6l11 9v12H5z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M13 27v-7h6v7" stroke="currentColor" stroke-width="2.5" fill="none"/></svg><span>${t('home')}</span></button></div></div>`;
+  $('#bar').classList.add('hide');
+}
+
+function pickUser() {
+  $('#app').innerHTML = `<div class="card"><h2>${t('pick')}</h2>${D.staff.map(s => `<button class="m" data-user="${esc(s)}"><div class="nm"><b>${esc(s)}</b></div></button>`).join('')}<label for="oth">Other</label><input id="oth" type="text"><button class="btn pri" style="width:100%;margin-top:12px" id="othok">OK</button></div>`;
+  $('#bar').classList.add('hide');
+}
+
+function showBar(on) { const b = $('#bar'); b.classList.toggle('hide', false); $('#back').textContent = t('back'); $('#save').textContent = t('save'); $('#save').classList.toggle('hide', !on) }
+
+function go(v) { view = v; F = (v === 'logform') ? F : {}; header(); ({home, log: pickMachine, logform: logForm, fuelin: fuelForm, dip: dipForm, bd: bdForm, user: pickUser})[v](); window.scrollTo(0, 0) }
+
+/* ---------- photo: shrink before upload ---------- */
+function shrink(file) {
+  return new Promise((res, rej) => { const img = new Image(), r = new FileReader();
+    r.onload = () => { img.onload = () => { const k = Math.min(1, 1280 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = img.width * k; c.height = img.height * k; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.7)) }; img.onerror = rej; img.src = r.result };
+    r.onerror = rej; r.readAsDataURL(file) });
+}
+
+/* ---------- save ---------- */
+let gps = '';
+function grabGps() { try { navigator.geolocation && navigator.geolocation.getCurrentPosition(p => gps = p.coords.latitude.toFixed(5) + ',' + p.coords.longitude.toFixed(5), () => {}, {timeout: 8000}) } catch (e) {} }
+
+async function save() {
+  if (busy) return; const err = m => { $('#err').textContent = m; return null }; const num = id => parseFloat($('#' + id)?.value);
+  let fn, rec;
+  const base = {by: user(), gps, at: new Date().toISOString()};
+  if (view === 'logform') {
+    const end = num('end'), fuel = num('fuel') || 0, m = cur;
+    if (isNaN(end)) return err(t('end') + ' ?');
+    if (m.last != null && end < m.last) return err('End reading is less than start reading');
+    if (m.meter === 'Hour' && m.last != null && end - m.last > 24) return err('More than 24 hours in one day – check reading');
+    if (!F.mp) return err(t('mphoto') + ' ?');
+    if (fuel > 0 && !F.fp) return err(t('fphoto') + ' ?');
+    if (F.cond === 'B' && !(num('bdh') > 0)) return err(t('bdh') + ' ?');
+    const d = new Date(); if (F.day === 'yst') d.setDate(d.getDate() - 1);
+    fn = 'saveLog'; rec = {...base, date: iso(d), id: m.id, start: m.last, end, fuel, idle: num('idle') || '', bdh: num('bdh') || '', cond: ({W: 'Working', I: 'Idle', B: 'Breakdown', N: 'Not at site'})[F.cond], work: $('#work').value.trim(), mp: F.mp, fp: F.fp || ''};
+  } else if (view === 'fuelin') {
+    const qty = num('qty'), rate = num('rate'); if (!(qty > 0)) return err(t('qty') + ' ?'); if (!F.bp) return err(t('bphoto') + ' ?');
+    fn = 'saveFuel'; rec = {...base, date: iso(new Date()), fuel: F.ft, qty, rate: rate || '', supp: $('#supp').value.trim(), bill: $('#bill').value.trim(), bp: F.bp};
+  } else if (view === 'dip') {
+    const meas = num('meas'); if (!(meas >= 0)) return err(t('meas') + ' ?'); if (!F.dp) return err('Photo ?');
+    fn = 'saveDip'; rec = {...base, date: iso(new Date()), fuel: F.ft, meas, dp: F.dp};
+  } else if (view === 'bd') {
+    const fault = $('#fault').value.trim(); if (!fault) return err(t('fault'));
+    fn = 'saveBreakdown'; rec = {...base, date: iso(new Date()), id: $('#bm').value, fault, eta: $('#eta').value, bdp: F.bdp || ''};
+  }
+  busy = true; $('#save').disabled = true; $('#save').textContent = '…';
+  try { await call(fn, rec); if (fn === 'saveLog') { D.logged[rec.date + '|' + rec.id] = 1; if (rec.date === iso(new Date())) cur.last = rec.end } doneView(t('saved')) }
+  catch (e) { const msg = String(e && e.message || e); if (/already/i.test(msg)) err(msg); else { const q = queue(); q.push({fn, rec}); store.set('cl_queue', q); doneView(t('queue')) } }
+  finally { busy = false; $('#save').disabled = false }
+}
+
+async function flush() { const q = queue(); if (!q.length) return; const left = []; for (const it of q) { try { await call(it.fn, it.rec) } catch (e) { if (!/already/i.test(String(e))) left.push(it) } } store.set('cl_queue', left); if (view === 'home') home() }
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.go) return go(b.dataset.go);
+  if (b.dataset.m) { cur = D.machines.find(m => m.id === b.dataset.m); F = {}; grabGps(); return go('logform') }
+  if (b.dataset.user) { store.set('cl_user', b.dataset.user); return go('home') }
+  if (b.id === 'othok') { const v = $('#oth').value.trim(); if (v) { store.set('cl_user', v); go('home') } return }
+  const s = b.closest('[data-seg]'); if (s) { F[s.dataset.seg] = b.dataset.v; s.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); if (s.dataset.seg === 'ft' && view === 'dip') $('#bookv').textContent = (D.stock[F.ft] ?? '—') + ' L'; return }
+  if (b.id === 'save') return save();
+  if (b.id === 'back') return go(view === 'logform' ? 'log' : 'home');
+  if (b.id === 'lang') { L = L === 'en' ? 'ne' : 'en'; store.set('cl_lang', L); return go(view === 'logform' ? 'logform' : view) }
+  if (b.id === 'who') return go('user');
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'end' || e.target.id === 'fuel') { F[e.target.id] = e.target.value; gauge() }
+  if (['idle', 'bdh', 'work'].includes(e.target.id)) F[e.target.id] = e.target.value;
+  if (e.target.id === 'meas') { const d = (+e.target.value) - (D.stock[F.ft] || 0); $('#dipg').innerHTML = e.target.value === '' ? '' : `<div class="gauge ${Math.abs(d) > 20 ? 'bad' : 'ok'}"><span>${t('diff')}</span><b>${d.toFixed(1)} L</b></div>` }
+});
+document.addEventListener('change', async e => {
+  const n = e.target.dataset.ph; if (!n || !e.target.files[0]) return;
+  try { F[n] = await shrink(e.target.files[0]); const im = $('#im_' + n); im.src = F[n]; im.classList.remove('hide') } catch (er) { $('#err').textContent = 'Photo could not be read' }
+});
+window.addEventListener('online', flush);
+
+/* ---------- start ---------- */
+header(); $('#app').innerHTML = '<p class="note">Loading…</p>';
+call('init').then(d => { D = d; header(); flush(); go(user() ? 'home' : 'user') }).catch(e => { $('#app').innerHTML = `<div class="q">Could not load: ${esc(e && e.message || e)}</div>` });
+}
+</script>
+</body>
+</html>
